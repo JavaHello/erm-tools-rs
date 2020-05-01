@@ -1,0 +1,11 @@
+[package]
+name = "erm-tools"
+version = "0.1.0"
+authors = ["luokai <kaiv2@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.105", features = [ "derive" ] }
+quick-xml = { version = "0.18.1", features = [ "serialize" ] }
