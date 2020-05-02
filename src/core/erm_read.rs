@@ -5,14 +5,15 @@ use std::io::prelude::*;
 
 use crate::core::TbRead;
 use crate::model::erm::Diagram;
-use crate::model::table::{Column, Table};
+use crate::model::table::{Column, Index, Table};
+use log::warn;
 pub fn read_xml(file_name: &str) -> String {
     let mut file: File =
-        File::open(file_name).expect(format!("读取文件失败：{}", file_name).as_str());
+        File::open(file_name).unwrap_or_else(|_| panic!("读取文件失败：{}", file_name));
     let mut contents = String::new();
     file.read_to_string(&mut contents)
-        .expect(format!("读取文件内容失败：{}", file_name).as_str());
-    return contents;
+        .unwrap_or_else(|_| panic!("读取文件内容失败：{}", file_name));
+    contents
 }
 
 pub struct ErmRead {
@@ -24,7 +25,7 @@ impl ErmRead {
     pub fn new(file_list: Vec<String>) -> ErmRead {
         let mut read = ErmRead {
             talbes: HashMap::new(),
-            file_list: file_list,
+            file_list,
         };
         read.init();
         read
@@ -46,9 +47,10 @@ impl ErmRead {
                     primary_keys: Vec::new(),
                     indexes: Vec::new(),
                 };
+                let mut col_map: HashMap<String, Column> = HashMap::new();
+
                 for ic in it.columns.normal_column.iter() {
                     let word = group_word.get(&ic.word_id);
-                    let mut col_map: HashMap<String, &mut Column> = HashMap::new();
                     match word {
                         Some(e) => {
                             let mut col = Column {
@@ -68,7 +70,7 @@ impl ErmRead {
                             };
 
                             // 拆分 varchar(n) 这种类型
-                            let cidx: usize = col.r#type.find("(").unwrap_or_default();
+                            let cidx: usize = col.r#type.find('(').unwrap_or_default();
                             if cidx > 0 {
                                 col.r#type = String::from(col.r#type.get(..cidx).unwrap());
                                 col.column_type = format!("{}{}{}", col.r#type, "(", col.length);
@@ -79,17 +81,39 @@ impl ErmRead {
                                     col.column_type.push_str(")");
                                 }
                             }
-                            col_map.insert(col.physical_name.to_owned(), &mut col);
+                            if col.primary_key {
+                                table.primary_keys.push(col.clone());
+                            }
+                            col_map.insert(ic.id.to_owned(), col.clone());
                             table.columns.push(col);
                         }
                         None => {
-                            println!(
+                            warn!(
                                 "无法获取的字段 {} - {}",
                                 &ic.physical_name, &ic.logical_name
                             );
                             continue;
                         }
                     }
+                }
+                for idx in it.indexes.index.iter() {
+                    let cols = idx
+                        .columns
+                        .column
+                        .iter()
+                        .map(|e| {
+                            let col = col_map.get(&e.id).unwrap_or_else(|| {
+                                panic!("索引配置有错误, table: {}", it.physical_name)
+                            });
+                            col.clone()
+                        })
+                        .collect::<Vec<Column>>();
+                    let index = Index {
+                        name: idx.name.clone(),
+                        non_unique: idx.non_unique.parse().unwrap(),
+                        columns: cols,
+                    };
+                    table.indexes.push(index);
                 }
                 self.talbes.insert(pname, table);
             }

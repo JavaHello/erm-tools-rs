@@ -60,8 +60,8 @@ pub struct Columns {
 
 #[derive(Debug, Deserialize)]
 pub struct Indexes {
-    #[serde(rename = "index", default)]
-    inidex: Vec<ErmInidex>,
+    #[serde(rename = "inidex", default)]
+    pub index: Vec<ErmInidex>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -69,27 +69,27 @@ pub struct ErmInidex {
     #[serde(rename = "full_text", default)]
     full_text: String,
     #[serde(rename = "non_unique", default)]
-    non_unique: String,
+    pub non_unique: String,
     #[serde(rename = "name", default)]
-    name: String,
+    pub name: String,
     #[serde(rename = "type", default)]
     r#type: String,
     #[serde(rename = "description", default)]
     description: String,
     #[serde(rename = "columns")]
-    columns: IndexColumns,
+    pub columns: IndexColumns,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct IndexColumns {
     #[serde(rename = "column", default)]
-    column: Vec<IndexColumn>,
+    pub column: Vec<IndexColumn>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct IndexColumn {
     #[serde(rename = "id", default)]
-    id: String,
+    pub id: String,
     #[serde(rename = "desc", default)]
     desc: String,
 }

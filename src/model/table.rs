@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 // Table 数据库表结构
 #[derive(Debug)]
 pub struct Table {
@@ -33,4 +34,26 @@ pub struct Index {
     pub name: String,
     pub non_unique: bool,
     pub columns: Vec<Column>,
+}
+impl Index {
+    pub fn get_cname(&self) -> String {
+        let mut result = String::new();
+        let cname = self
+            .columns
+            .iter()
+            .map(|e| e.physical_name.clone())
+            .collect::<Vec<String>>()
+            .join(", ");
+        result.push_str(&cname);
+        result
+    }
+}
+impl Table {
+    pub fn group_cols(&self) -> HashMap<String, &Column> {
+        let mut gm = HashMap::new();
+        for it in self.columns.iter() {
+            gm.insert(it.physical_name.clone(), it);
+        }
+        gm
+    }
 }

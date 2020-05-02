@@ -4,7 +4,7 @@ mod tb_diff;
 
 use crate::model::diff_table::DiffTable;
 use crate::model::table::Table;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 pub trait TbRead {
     fn read(&self, naem: &str) -> Option<&Table>;
 }
@@ -16,5 +16,5 @@ pub trait Diff {
 }
 
 pub trait OutDiff {
-    fn write(&mut self, diff_tables: &HashMap<String, DiffTable>);
+    fn write(&mut self, diff_tables: &BTreeMap<String, DiffTable>);
 }
