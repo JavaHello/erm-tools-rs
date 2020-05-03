@@ -1,5 +1,6 @@
 mod erm_read;
 mod md_out;
+mod mysql_read;
 mod tb_diff;
 
 use crate::model::diff_table::DiffTable;
@@ -10,6 +11,7 @@ pub trait TbRead {
 }
 pub use crate::core::erm_read::ErmRead;
 pub use crate::core::md_out::MdOut;
+pub use crate::core::mysql_read::MysqlRead;
 pub use crate::core::tb_diff::TableDiff;
 pub trait Diff {
     fn diff(&mut self);

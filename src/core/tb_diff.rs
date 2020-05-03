@@ -51,7 +51,7 @@ impl Diff for TableDiff<'_> {
                             let dtb = TableDiff::get_diff(
                                 &mut self.diff,
                                 k1.clone(),
-                                v1.description.clone(),
+                                v1.logical_name.clone(),
                             );
 
                             dtb.diff_columns.push(DiffColumn {
@@ -61,8 +61,11 @@ impl Diff for TableDiff<'_> {
                             });
                         }
                     } else {
-                        let dtb =
-                            TableDiff::get_diff(&mut self.diff, k1.clone(), v1.description.clone());
+                        let dtb = TableDiff::get_diff(
+                            &mut self.diff,
+                            k1.clone(),
+                            v1.logical_name.clone(),
+                        );
                         dtb.diff_columns.push(DiffColumn {
                             name: ic1.physical_name.clone(),
                             new_column: Some(ic1.clone()),
@@ -72,7 +75,7 @@ impl Diff for TableDiff<'_> {
                 }
                 for (_, icv2) in col_map.iter() {
                     let dtb =
-                        TableDiff::get_diff(&mut self.diff, k1.clone(), v1.description.clone());
+                        TableDiff::get_diff(&mut self.diff, k1.clone(), v1.logical_name.clone());
                     dtb.diff_columns.push(DiffColumn {
                         name: icv2.physical_name.clone(),
                         new_column: None,
@@ -87,8 +90,11 @@ impl Diff for TableDiff<'_> {
                 for ic1 in v1.primary_keys.iter() {
                     if let Some(_ic2) = pk_map.remove(&ic1.physical_name) {
                     } else {
-                        let dtb =
-                            TableDiff::get_diff(&mut self.diff, k1.clone(), v1.description.clone());
+                        let dtb = TableDiff::get_diff(
+                            &mut self.diff,
+                            k1.clone(),
+                            v1.logical_name.clone(),
+                        );
                         dtb.diff_pks.push(DiffColumn {
                             name: ic1.physical_name.clone(),
                             new_column: Some(ic1.clone()),
@@ -98,7 +104,7 @@ impl Diff for TableDiff<'_> {
                 }
                 for (_, icv2) in pk_map.iter() {
                     let dtb =
-                        TableDiff::get_diff(&mut self.diff, k1.clone(), v1.description.clone());
+                        TableDiff::get_diff(&mut self.diff, k1.clone(), v1.logical_name.clone());
                     dtb.diff_pks.push(DiffColumn {
                         name: icv2.physical_name.clone(),
                         new_column: None,
@@ -116,7 +122,7 @@ impl Diff for TableDiff<'_> {
                             let dtb = TableDiff::get_diff(
                                 &mut self.diff,
                                 k1.clone(),
-                                v1.description.clone(),
+                                v1.logical_name.clone(),
                             );
 
                             dtb.diff_indexes.push(DiffIndex {
@@ -126,8 +132,11 @@ impl Diff for TableDiff<'_> {
                             });
                         }
                     } else {
-                        let dtb =
-                            TableDiff::get_diff(&mut self.diff, k1.clone(), v1.description.clone());
+                        let dtb = TableDiff::get_diff(
+                            &mut self.diff,
+                            k1.clone(),
+                            v1.logical_name.clone(),
+                        );
                         dtb.diff_indexes.push(DiffIndex {
                             name: ic1.name.clone(),
                             new_index: Some(ic1.clone()),
@@ -137,7 +146,7 @@ impl Diff for TableDiff<'_> {
                 }
                 for (_, icv2) in idx_map.iter() {
                     let dtb =
-                        TableDiff::get_diff(&mut self.diff, k1.clone(), v1.description.clone());
+                        TableDiff::get_diff(&mut self.diff, k1.clone(), v1.logical_name.clone());
                     dtb.diff_indexes.push(DiffIndex {
                         name: icv2.name.clone(),
                         new_index: None,
@@ -149,7 +158,7 @@ impl Diff for TableDiff<'_> {
                     k1.clone(),
                     DiffTable {
                         name: k1.clone(),
-                        comment: v1.description.clone(),
+                        comment: v1.logical_name.clone(),
                         is_new: true,
                         diff_columns: v1
                             .columns

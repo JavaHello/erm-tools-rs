@@ -1,6 +1,6 @@
-use erm_tools::core::ErmRead;
 use erm_tools::core::MdOut;
 use erm_tools::core::{Diff, OutDiff, TableDiff};
+use erm_tools::core::{ErmRead, MysqlRead};
 
 #[test]
 fn test_diff_out() {
@@ -66,4 +66,18 @@ fn test_diff_out() {
 ",
         out.content
     );
+}
+
+#[test]
+fn test_db_diff_out() {
+    let mut erm1 = ErmRead::new(vec!["erms/db.erm".to_owned()]);
+    let mut db = MysqlRead::new(
+        "mysql://root:123456@localhost:3306/information_schema",
+        "demodb",
+    );
+    let mut diff = TableDiff::new(&mut erm1.talbes, &mut db.talbes);
+    diff.diff();
+    let mut out = MdOut::new();
+    out.write(&diff.diff);
+    println!("{}", out.content);
 }

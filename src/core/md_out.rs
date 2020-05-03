@@ -34,7 +34,10 @@ impl OutDiff for MdOut {
                     if let Some(col) = &dcol.new_column {
                         self.content.push_str(&format!(
                             "|{}|{}|{}|{}|",
-                            col.physical_name, col.r#type, col.length, col.decimal
+                            col.physical_name,
+                            col.r#type,
+                            col.length.unwrap_or_default(),
+                            col.decimal.unwrap_or_default()
                         ));
                     } else {
                         self.content.push_str("|||||");
@@ -42,7 +45,10 @@ impl OutDiff for MdOut {
                     if let Some(col) = &dcol.old_column {
                         self.content.push_str(&format!(
                             "|{}|{}|{}|{}|",
-                            col.physical_name, col.r#type, col.length, col.decimal
+                            col.physical_name,
+                            col.r#type,
+                            col.length.unwrap_or_default(),
+                            col.decimal.unwrap_or_default()
                         ));
                     } else {
                         self.content.push_str("|||||");

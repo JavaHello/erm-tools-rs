@@ -42,7 +42,7 @@ impl ErmRead {
                 let mut table = Table {
                     physical_name: pname.clone(),
                     logical_name: lname,
-                    description: desc,
+                    description: Some(desc),
                     columns: Vec::new(),
                     primary_keys: Vec::new(),
                     indexes: Vec::new(),
@@ -58,13 +58,13 @@ impl ErmRead {
                                 logical_name: e.logical_name.clone(),
                                 r#type: e.r#type.clone(),
                                 auto_increment: false,
-                                default_value: ic.default_value.clone(),
-                                length: e.length.parse().unwrap_or_default(),
-                                decimal: e.decimal.parse().unwrap_or_default(),
+                                default_value: Some(ic.default_value.clone()),
+                                length: Some(e.length.parse().unwrap_or_default()),
+                                decimal: Some(e.decimal.parse().unwrap_or_default()),
                                 primary_key: ic.primary_key.parse().unwrap(),
                                 unique_key: ic.unique_key.parse().unwrap(),
                                 not_null: ic.not_null.parse().unwrap(),
-                                description: e.description.clone(),
+                                description: Some(e.description.clone()),
                                 desc: false,
                                 column_type: e.r#type.clone(),
                             };
@@ -73,10 +73,15 @@ impl ErmRead {
                             let cidx: usize = col.r#type.find('(').unwrap_or_default();
                             if cidx > 0 {
                                 col.r#type = String::from(col.r#type.get(..cidx).unwrap());
-                                col.column_type = format!("{}{}{}", col.r#type, "(", col.length);
-                                if col.decimal > 0 {
+                                col.column_type = format!(
+                                    "{}{}{}",
+                                    col.r#type,
+                                    "(",
+                                    col.length.unwrap_or_default()
+                                );
+                                if let Some(decimal) = col.decimal {
                                     col.column_type
-                                        .push_str(&format!("{}{}{}", ", ", col.decimal, ")"));
+                                        .push_str(&format!("{}{}{}", ", ", decimal, ")"));
                                 } else {
                                     col.column_type.push_str(")");
                                 }
