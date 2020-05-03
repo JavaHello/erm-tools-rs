@@ -1,7 +1,5 @@
 use crate::core::TbRead;
-use crate::model::erm::Diagram;
 use crate::model::table::{Column, Index, Table};
-use log::warn;
 use mysql::prelude::*;
 use mysql::*;
 use std::cell::RefCell;
@@ -17,7 +15,7 @@ pub struct MysqlRead {
 impl MysqlRead {
     pub fn new(url: &str, db_name: &str) -> Self {
         let mut mrd = MysqlRead {
-            pool: Pool::new(url).expect(&format!("初始化mysql连接失败:{}", url)),
+            pool: Pool::new(url).unwrap_or_else(|_| panic!("初始化mysql连接失败:{}", url)),
             db_name: db_name.to_owned(),
             talbes: HashMap::new(),
         };
@@ -61,7 +59,7 @@ impl MysqlRead {
                     where TABLE_SCHEMA = ?
                     and TABLE_NAME = ?",
                 )
-                .expect(&format!("查询表结构失败:{}", table_name));
+                .unwrap_or_else(|_| panic!("查询表结构失败:{}", table_name));
             let col_list = conn
                 .exec_map(
                     prep,
@@ -130,7 +128,7 @@ impl MysqlRead {
                     where TABLE_SCHEMA = ?
                       and TABLE_NAME = ?",
                 )
-                .expect(&format!("查询表结构失败:{}", table_name));
+                .unwrap_or_else(|_| panic!("查询索引失败:{}", table_name));
             let pks = &mut table.primary_keys;
             let ids = &mut table.indexes;
             let idx_info_list = conn
@@ -151,17 +149,15 @@ impl MysqlRead {
                 } else if old_idx_name != idx_name {
                     let mut rx = Index {
                         name: idx_name.clone(),
-                        non_unique: non_unique,
+                        non_unique,
                         columns: Vec::new(),
                     };
                     rx.columns.push(col.clone());
                     let x = Rc::new(RefCell::new(rx));
                     ids.push(Rc::clone(&x));
                     idx = Some(Rc::clone(&x));
-                } else {
-                    if let Some(v) = idx.take() {
-                        v.borrow_mut().columns.push(col.clone());
-                    }
+                } else if let Some(v) = idx.take() {
+                    v.borrow_mut().columns.push(col.clone());
                 }
                 old_idx_name = idx_name.clone();
             }
