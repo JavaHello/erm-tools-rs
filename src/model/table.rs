@@ -1,13 +1,15 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 // Table 数据库表结构
 #[derive(Debug)]
 pub struct Table {
     pub physical_name: String,
     pub logical_name: String,
     pub description: Option<String>,
-    pub columns: Vec<Column>,
-    pub primary_keys: Vec<Column>,
-    pub indexes: Vec<Index>,
+    pub columns: Vec<Rc<RefCell<Column>>>,
+    pub primary_keys: Vec<Rc<RefCell<Column>>>,
+    pub indexes: Vec<Rc<RefCell<Index>>>,
 }
 
 // Column 字段信息
@@ -33,7 +35,7 @@ pub struct Column {
 pub struct Index {
     pub name: String,
     pub non_unique: bool,
-    pub columns: Vec<Column>,
+    pub columns: Vec<Rc<RefCell<Column>>>,
 }
 impl Index {
     pub fn get_cname(&self) -> String {
@@ -41,7 +43,7 @@ impl Index {
         let cname = self
             .columns
             .iter()
-            .map(|e| e.physical_name.clone())
+            .map(|e| (*e).borrow().physical_name.clone())
             .collect::<Vec<String>>()
             .join(", ");
         result.push_str(&cname);
@@ -49,10 +51,26 @@ impl Index {
     }
 }
 impl Table {
-    pub fn group_cols(&self) -> HashMap<String, &Column> {
+    pub fn group_cols(&self) -> HashMap<String, Rc<RefCell<Column>>> {
         let mut gm = HashMap::new();
         for it in self.columns.iter() {
-            gm.insert(it.physical_name.clone(), it);
+            gm.insert((*it).borrow().physical_name.clone(), Rc::clone(it));
+        }
+        gm
+    }
+
+    pub fn group_pks(&self) -> HashMap<String, Rc<RefCell<Column>>> {
+        let mut gm = HashMap::new();
+        for it in self.primary_keys.iter() {
+            gm.insert((*it).borrow().physical_name.clone(), Rc::clone(it));
+        }
+        gm
+    }
+
+    pub fn group_idxes(&self) -> HashMap<String, Rc<RefCell<Index>>> {
+        let mut gm = HashMap::new();
+        for it in self.indexes.iter() {
+            gm.insert((*it).borrow().get_cname(), Rc::clone(it));
         }
         gm
     }

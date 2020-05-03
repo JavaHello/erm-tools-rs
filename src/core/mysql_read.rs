@@ -6,6 +6,8 @@ use mysql::prelude::*;
 use mysql::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
+
+use std::rc::Rc;
 pub struct MysqlRead {
     pool: Pool,
     db_name: String,
@@ -100,8 +102,8 @@ impl MysqlRead {
                         } else {
                             data_type.clone()
                         };
-                        let col = Column {
-                            physical_name: column_name,
+                        let col = Rc::new(RefCell::new(Column {
+                            physical_name: column_name.clone(),
                             logical_name: column_comment,
                             r#type: data_type,
                             auto_increment: "auto_increment" == extra,
@@ -114,8 +116,8 @@ impl MysqlRead {
                             description: None,
                             desc: false,
                             column_type: col_type,
-                        };
-                        col_map.insert(col.physical_name.clone(), col.clone());
+                        }));
+                        col_map.insert(column_name, Rc::clone(&col));
                         col
                     },
                 )
@@ -138,23 +140,27 @@ impl MysqlRead {
                 )
                 .expect("查询表失败");
             let mut old_idx_name = String::new();
-            let mut idx: RefCell<Option<Index>> = RefCell::new(None);
+            let mut idx: Option<Rc<RefCell<Index>>> = None;
             for (_, non_unique, idx_name, col_name) in idx_info_list {
+                let col = col_map.get(&col_name).unwrap();
+                let mut rcol = col.borrow_mut();
+                rcol.unique_key = non_unique;
                 if idx_name == "PRIMARY" {
-                    pks.push(col_map.get(&col_name).unwrap().clone());
+                    pks.push(col.clone());
+                    rcol.primary_key = true;
                 } else if old_idx_name != idx_name {
-                    idx = RefCell::new(Some(Index {
+                    let mut rx = Index {
                         name: idx_name.clone(),
                         non_unique: non_unique,
                         columns: Vec::new(),
-                    }));
-                    if let Some(idx) = idx.borrow_mut().as_mut() {
-                        idx.columns.push(col_map.get(&col_name).unwrap().clone());
-                    }
-                    ids.push(idx.borrow_mut().take().unwrap());
+                    };
+                    rx.columns.push(col.clone());
+                    let x = Rc::new(RefCell::new(rx));
+                    ids.push(Rc::clone(&x));
+                    idx = Some(Rc::clone(&x));
                 } else {
-                    if let Some(v) = idx.borrow_mut().as_mut() {
-                        v.columns.push(col_map.get(&col_name).unwrap().clone());
+                    if let Some(v) = idx.take() {
+                        v.borrow_mut().columns.push(col.clone());
                     }
                 }
                 old_idx_name = idx_name.clone();

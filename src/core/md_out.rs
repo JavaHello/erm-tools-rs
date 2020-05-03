@@ -32,6 +32,7 @@ impl OutDiff for MdOut {
                 self.content.push_str(COLUMN_TITLE);
                 for dcol in dtb.diff_columns.iter() {
                     if let Some(col) = &dcol.new_column {
+                        let col = (*col).borrow();
                         self.content.push_str(&format!(
                             "|{}|{}|{}|{}|",
                             col.physical_name,
@@ -43,6 +44,7 @@ impl OutDiff for MdOut {
                         self.content.push_str("|||||");
                     }
                     if let Some(col) = &dcol.old_column {
+                        let col = (*col).borrow();
                         self.content.push_str(&format!(
                             "|{}|{}|{}|{}|",
                             col.physical_name,
@@ -63,12 +65,14 @@ impl OutDiff for MdOut {
 
                 for dcol in dtb.diff_pks.iter() {
                     if let Some(col) = &dcol.new_column {
+                        let col = (*col).borrow();
                         self.content
                             .push_str(&format!("|pk|{}|主键|", col.physical_name));
                     } else {
                         self.content.push_str("||||");
                     }
                     if let Some(col) = &dcol.old_column {
+                        let col = (*col).borrow();
                         self.content
                             .push_str(&format!("|pk|{}|主键|", col.physical_name));
                     } else {
@@ -79,6 +83,7 @@ impl OutDiff for MdOut {
 
                 for dcol in dtb.diff_indexes.iter() {
                     if let Some(col) = &dcol.new_index {
+                        let col = (*col).borrow();
                         if col.non_unique {
                             self.content.push_str(&format!(
                                 "|{}|{}|普通|",
@@ -96,6 +101,7 @@ impl OutDiff for MdOut {
                         self.content.push_str("||||");
                     }
                     if let Some(col) = &dcol.old_index {
+                        let col = (*col).borrow();
                         if col.non_unique {
                             self.content.push_str(&format!(
                                 "|{}|{}|普通|",

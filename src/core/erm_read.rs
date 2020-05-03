@@ -1,7 +1,9 @@
 use quick_xml::de::from_str;
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
+use std::rc::Rc;
 
 use crate::core::TbRead;
 use crate::model::erm::Diagram;
@@ -47,13 +49,13 @@ impl ErmRead {
                     primary_keys: Vec::new(),
                     indexes: Vec::new(),
                 };
-                let mut col_map: HashMap<String, Column> = HashMap::new();
+                let mut col_map = HashMap::new();
 
                 for ic in it.columns.normal_column.iter() {
                     let word = group_word.get(&ic.word_id);
                     match word {
                         Some(e) => {
-                            let mut col = Column {
+                            let col = Rc::new(RefCell::new(Column {
                                 physical_name: e.physical_name.clone(),
                                 logical_name: e.logical_name.clone(),
                                 r#type: e.r#type.clone(),
@@ -67,8 +69,13 @@ impl ErmRead {
                                 description: Some(e.description.clone()),
                                 desc: false,
                                 column_type: e.r#type.clone(),
-                            };
-
+                            }));
+                            if col.borrow().primary_key {
+                                table.primary_keys.push(Rc::clone(&col));
+                            }
+                            col_map.insert(ic.id.to_owned(), Rc::clone(&col));
+                            table.columns.push(Rc::clone(&col));
+                            let mut col = col.borrow_mut();
                             // 拆分 varchar(n) 这种类型
                             let cidx: usize = col.r#type.find('(').unwrap_or_default();
                             if cidx > 0 {
@@ -86,11 +93,6 @@ impl ErmRead {
                                     col.column_type.push_str(")");
                                 }
                             }
-                            if col.primary_key {
-                                table.primary_keys.push(col.clone());
-                            }
-                            col_map.insert(ic.id.to_owned(), col.clone());
-                            table.columns.push(col);
                         }
                         None => {
                             warn!(
@@ -107,17 +109,16 @@ impl ErmRead {
                         .column
                         .iter()
                         .map(|e| {
-                            let col = col_map.get(&e.id).unwrap_or_else(|| {
+                            Rc::clone(col_map.get(&e.id).unwrap_or_else(|| {
                                 panic!("索引配置有错误, table: {}", it.physical_name)
-                            });
-                            col.clone()
+                            }))
                         })
-                        .collect::<Vec<Column>>();
-                    let index = Index {
+                        .collect::<Vec<Rc<RefCell<Column>>>>();
+                    let index = Rc::new(RefCell::new(Index {
                         name: idx.name.clone(),
                         non_unique: idx.non_unique.parse().unwrap(),
                         columns: cols,
-                    };
+                    }));
                     table.indexes.push(index);
                 }
                 self.talbes.insert(pname, table);

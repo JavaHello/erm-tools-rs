@@ -81,3 +81,51 @@ fn test_db_diff_out() {
     out.write(&diff.diff);
     println!("{}", out.content);
 }
+
+use std::cell::RefCell;
+use std::rc::Rc;
+#[derive(Debug)]
+struct A {
+    name: String,
+}
+#[derive(Debug)]
+struct B {
+    name: String,
+}
+#[derive(Debug)]
+struct C {
+    list_a: Vec<Rc<RefCell<A>>>,
+    list_b: Vec<Rc<B>>,
+}
+
+#[test]
+fn test_rc() {
+    let mut c = C {
+        list_a: Vec::new(),
+        list_b: Vec::new(),
+    };
+    let a = Rc::new(RefCell::new(A {
+        name: String::from("zhang"),
+    }));
+    println!("{:p}", a.as_ref());
+    c.list_a.push(a);
+    f2(&c);
+    c.list_b.push(Rc::new(B {
+        name: String::from("li"),
+    }));
+    println!("{:?}", c.list_a);
+}
+
+fn f2(c: &C) {
+    let mut c2 = C {
+        list_a: Vec::new(),
+        list_b: Vec::new(),
+    };
+
+    for c1a in c.list_a.iter() {
+        println!("{:p}", c1a.as_ref());
+        let mut a = (*c1a).borrow_mut();
+        a.name = String::from("我改了");
+        c2.list_a.push(Rc::clone(c1a));
+    }
+}
