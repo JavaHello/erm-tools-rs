@@ -82,11 +82,23 @@ fn test_db_diff_out() {
     println!("{}", out.content);
 }
 
+// 场景 多个 C 对象需要共享  A, B 数据，对A需要有修改权限
 use std::cell::RefCell;
 use std::rc::Rc;
 #[derive(Debug)]
 struct A {
     name: String,
+}
+impl Drop for A {
+    fn drop(&mut self) {
+        println!("A drop: {}", self.name);
+    }
+}
+
+impl Drop for B {
+    fn drop(&mut self) {
+        println!("B drop: {}", self.name);
+    }
 }
 #[derive(Debug)]
 struct B {
@@ -104,16 +116,22 @@ fn test_rc() {
         list_a: Vec::new(),
         list_b: Vec::new(),
     };
-    let a = Rc::new(RefCell::new(A {
+    let a = A {
         name: String::from("zhang"),
-    }));
-    println!("{:p}", a.as_ref());
+    };
+    let a = Rc::new(RefCell::new(a));
+    let b = Rc::new(B {
+        name: String::from("wu"),
+    });
+    println!("a ptr: {:p}", a);
+    println!("b ptr: {:p}", b);
     c.list_a.push(a);
+    c.list_b.push(b);
     f2(&c);
     c.list_b.push(Rc::new(B {
         name: String::from("li"),
     }));
-    println!("{:?}", c.list_a);
+    println!("{:?}", c);
 }
 
 fn f2(c: &C) {
@@ -123,9 +141,14 @@ fn f2(c: &C) {
     };
 
     for c1a in c.list_a.iter() {
-        println!("{:p}", c1a.as_ref());
+        println!("a ptr: {:p}", *c1a);
         let mut a = (*c1a).borrow_mut();
         a.name = String::from("我改了");
         c2.list_a.push(Rc::clone(c1a));
     }
+    for c1b in c.list_b.iter() {
+        println!("b ptr: {:p}", *c1b);
+        c2.list_b.push(Rc::clone(c1b));
+    }
+    println!("{:?}", c2);
 }
