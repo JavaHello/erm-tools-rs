@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 #[derive(Default)]
 pub struct MdOut {
     pub content: String,
+    pub db_name: String,
 }
 
 const COLUMN_TITLE: &str = "|new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
@@ -16,9 +17,10 @@ const INDEX_TITLE: &str = "|new名称|new字段|new类型||old名称|old字段|o
 ";
 
 impl MdOut {
-    pub fn new() -> Self {
+    pub fn new(db_name: &str) -> Self {
         MdOut {
             content: String::new(),
+            db_name: db_name.to_string(),
         }
     }
 }
@@ -26,7 +28,8 @@ impl MdOut {
 impl OutDiff for MdOut {
     fn write(&mut self, diff_tables: &BTreeMap<String, DiffTable>) {
         if !diff_tables.is_empty() {
-            self.content.push_str("# 差异输出\n");
+            self.content
+                .push_str(&format!("# {}差异输出\n", self.db_name));
             for (k, dtb) in diff_tables.iter() {
                 self.content.push_str(&format!("\n## {}\n", k));
                 self.content.push_str(COLUMN_TITLE);

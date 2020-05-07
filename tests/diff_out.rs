@@ -8,10 +8,10 @@ fn test_diff_out() {
     let mut erm2 = ErmRead::new(vec!["erms/db2.erm".to_owned()]);
     let mut diff = TableDiff::new(&mut erm1.talbes, &mut erm2.talbes);
     diff.diff();
-    let mut out = MdOut::new();
+    let mut out = MdOut::new("demodb");
     out.write(&diff.diff);
     assert_eq!(
-        "# 差异输出
+        "# demodb差异输出
 
 ## tm_test
 |new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
@@ -77,7 +77,7 @@ fn test_db_diff_out() {
     );
     let mut diff = TableDiff::new(&mut erm1.talbes, &mut db.talbes);
     diff.diff();
-    let mut out = MdOut::new();
+    let mut out = MdOut::new("demodb");
     out.write(&diff.diff);
     println!("{}", out.content);
 }

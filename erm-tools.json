@@ -1,0 +1,31 @@
+{
+    "diffType": "db-db",
+    "sourceErmFile": {
+        "dbName": "demodb",
+        "ermPath": "D:\\workspace\\JavaProjects\\demo\\src\\main\\resources\\",
+        "ermFiles": ["db.erm"]
+    },
+    "targetErmFile": {
+        "dbName": "demodb",
+        "ermPath": "D:\\workspace\\JavaProjects\\demo\\src\\main\\resources\\",
+        "ermFiles": ["db2.erm"]
+    },
+    "sourceDb": {
+        "dbName": "demodb",
+        "dbHost": "127.0.0.1",
+        "dbUser": "root",
+        "dbPassword": "123456",
+        "dbPort": "3306",
+        "dbType": "mysql"
+    },
+    "targetDbList": [{
+        "dbName": "demodb",
+        "dbHost": "127.0.0.1",
+        "dbUser": "root",
+        "dbPassword": "123456",
+        "dbPort": "3306",
+        "dbType": "mysql"
+    }],
+    "outPath": "",
+    "genDdl": true
+}
