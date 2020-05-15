@@ -1,5 +1,5 @@
 {
-    "diffType": "db-db",
+    "diffType": "erm-db",
     "sourceErmFile": {
         "dbName": "demodb",
         "ermPath": "D:\\workspace\\JavaProjects\\demo\\src\\main\\resources\\",

@@ -25,6 +25,14 @@ impl MdOut {
     }
 }
 
+fn i32_to_str(i: Option<i32>) -> String {
+    if let Some(i) = i {
+        format!("{}", i)
+    } else {
+        String::new()
+    }
+}
+
 impl OutDiff for MdOut {
     fn write(&mut self, diff_tables: &BTreeMap<String, DiffTable>) {
         if !diff_tables.is_empty() {
@@ -40,8 +48,8 @@ impl OutDiff for MdOut {
                             "|{}|{}|{}|{}|",
                             col.physical_name,
                             col.r#type,
-                            col.length.unwrap_or_default(),
-                            col.decimal.unwrap_or_default()
+                            i32_to_str(col.length),
+                            i32_to_str(col.decimal)
                         ));
                     } else {
                         self.content.push_str("|||||");
@@ -52,8 +60,8 @@ impl OutDiff for MdOut {
                             "|{}|{}|{}|{}|",
                             col.physical_name,
                             col.r#type,
-                            col.length.unwrap_or_default(),
-                            col.decimal.unwrap_or_default()
+                            i32_to_str(col.length),
+                            i32_to_str(col.decimal)
                         ));
                     } else {
                         self.content.push_str("|||||");

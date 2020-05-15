@@ -1,0 +1,9 @@
+{
+    "character": {
+        "name": "char"
+    },
+    "integer": {
+        "name": "int",
+        "length": 10
+    }
+}

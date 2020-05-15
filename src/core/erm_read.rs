@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::rc::Rc;
 
+use crate::core::env;
 use crate::core::TbRead;
 use crate::model::erm::Diagram;
 use crate::model::table::{Column, Index, Table};
@@ -33,6 +34,7 @@ impl ErmRead {
         read
     }
     fn init(&mut self) {
+        let cov_type = env::get_mysql_cov_type();
         for file in self.file_list.iter() {
             let data = read_xml(&file);
             let erm: Diagram = from_str(&data).unwrap();
@@ -61,8 +63,16 @@ impl ErmRead {
                                 r#type: e.r#type.clone(),
                                 auto_increment: false,
                                 default_value: Some(ic.default_value.clone()),
-                                length: Some(e.length.parse().unwrap_or_default()),
-                                decimal: Some(e.decimal.parse().unwrap_or_default()),
+                                length: if let Ok(e) = e.length.parse() {
+                                    Some(e)
+                                } else {
+                                    None
+                                },
+                                decimal: if let Ok(e) = e.decimal.parse() {
+                                    Some(e)
+                                } else {
+                                    None
+                                },
                                 primary_key: ic.primary_key.parse().unwrap(),
                                 unique_key: ic.unique_key.parse().unwrap(),
                                 not_null: ic.not_null.parse().unwrap(),
@@ -80,6 +90,14 @@ impl ErmRead {
                             let cidx: usize = col.r#type.find('(').unwrap_or_default();
                             if cidx > 0 {
                                 col.r#type = String::from(col.r#type.get(..cidx).unwrap());
+                            }
+                            if let Some(cfg_type) = cov_type.get(&col.r#type) {
+                                col.r#type = cfg_type.name.clone();
+                                if let Some(len) = cfg_type.length {
+                                    col.length = Some(len);
+                                }
+                            }
+                            if cidx > 0 {
                                 col.column_type = format!(
                                     "{}{}{}",
                                     col.r#type,

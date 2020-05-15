@@ -5,6 +5,9 @@ authors = ["luokai <kaiv2@outlook.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name= "erm-tools"
+path = "src/bin/main.rs"
 
 [dependencies]
 serde = { version = "1.0.105", features = [ "derive" ] }
@@ -13,3 +16,4 @@ quick-xml = { version = "0.18.1", features = [ "serialize" ] }
 log = "0.4"
 mysql = "*"
 clap = "3.0.0-beta.1"
+lazy_static = "1.4.0"
