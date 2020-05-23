@@ -1,3 +1,4 @@
+use crate::core::env;
 use crate::core::TbRead;
 use crate::model::table::{Column, Index, Table};
 use mysql::prelude::*;
@@ -83,19 +84,25 @@ impl MysqlRead {
                         let data_type: String = data_type;
                         let character_maximum_length: Option<i32> = character_maximum_length;
                         let numeric_precision: Option<i32> = numeric_precision;
-                        let numeric_scale: Option<i32> = numeric_scale;
+                        let mut numeric_scale: Option<i32> = numeric_scale;
                         let column_comment: String = column_comment;
                         let column_type: String = column_type;
                         let extra: String = extra;
                         let column_default: Option<String> = column_default;
-                        let len = if let Some(v) = character_maximum_length {
+                        let ignore_type =
+                            env::get_ignore_len_type().contains(&data_type.to_lowercase());
+                        let mut len = if let Some(v) = character_maximum_length {
                             Some(v)
                         } else if let Some(v) = numeric_precision {
                             Some(v)
                         } else {
                             None
                         };
-                        let col_type = if column_type != "" {
+                        if ignore_type {
+                            len = None;
+                            numeric_scale = None;
+                        }
+                        let col_type = if column_type != "" && !ignore_type {
                             column_type
                         } else {
                             data_type.clone()

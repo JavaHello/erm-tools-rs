@@ -9,6 +9,15 @@ lazy_static! {
     static ref COV_SQL_TYPE: Arc<RwLock<HashMap<String, HashMap<String, CovType>>>> =
         Arc::new(RwLock::new(HashMap::new()));
     pub static ref ENV: Arc<RwLock<Option<EnvConfig>>> = Arc::new(RwLock::new(None));
+    pub static ref IGNORE_LEN_TYPE: Vec<String> = {
+        let mut t = Vec::new();
+        t.push("int".to_owned());
+        t.push("integer".to_owned());
+        t.push("bigint".to_owned());
+        t.push("date".to_owned());
+        t.push("datetime".to_owned());
+        t
+    };
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -85,6 +94,9 @@ pub fn load_env(config_path: &str) -> Result<(), Box<dyn std::error::Error + 'st
 
 pub fn get_env() -> Arc<RwLock<Option<EnvConfig>>> {
     Arc::clone(&ENV)
+}
+pub fn get_ignore_len_type() -> Vec<String> {
+    IGNORE_LEN_TYPE.clone()
 }
 
 pub fn get_mysql_cov_type() -> HashMap<String, CovType> {

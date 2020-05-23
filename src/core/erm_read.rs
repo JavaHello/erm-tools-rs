@@ -91,25 +91,34 @@ impl ErmRead {
                             if cidx > 0 {
                                 col.r#type = String::from(col.r#type.get(..cidx).unwrap());
                             }
+                            let ignore_type =
+                                env::get_ignore_len_type().contains(&col.r#type.to_lowercase());
+                            if ignore_type {
+                                col.length = None;
+                                col.decimal = None;
+                            }
                             if let Some(cfg_type) = cov_type.get(&col.r#type) {
                                 col.r#type = cfg_type.name.clone();
                                 if let Some(len) = cfg_type.length {
                                     col.length = Some(len);
                                 }
                             }
-                            if cidx > 0 {
+                            if cidx > 0 && !ignore_type {
                                 col.column_type = format!(
                                     "{}{}{}",
                                     col.r#type,
                                     "(",
                                     col.length.unwrap_or_default()
                                 );
+
                                 if let Some(decimal) = col.decimal {
                                     col.column_type
                                         .push_str(&format!("{}{}{}", ", ", decimal, ")"));
                                 } else {
                                     col.column_type.push_str(")");
                                 }
+                            } else {
+                                col.column_type = col.r#type.clone();
                             }
                         }
                         None => {
