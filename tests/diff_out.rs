@@ -71,6 +71,7 @@ fn test_diff_out() {
 }
 
 #[test]
+#[ignore]
 fn test_db_diff_out() {
     let mut erm1 = ErmRead::new(vec!["erms/db.erm".to_owned()]);
     let mut db = MysqlRead::new(
