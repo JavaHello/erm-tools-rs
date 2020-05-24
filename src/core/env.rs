@@ -5,6 +5,10 @@ use std::io::prelude::*;
 
 use std::sync::{Arc, RwLock};
 
+const COV_TYPE_FILE_PREFIX: &str = "cov_type_";
+const COV_TYPE_FILE_EXT: &str = ".json";
+const COV_TYPE_PATH: &str = "./conf/";
+
 lazy_static! {
     static ref COV_SQL_TYPE: Arc<RwLock<HashMap<String, HashMap<String, CovType>>>> =
         Arc::new(RwLock::new(HashMap::new()));
@@ -74,21 +78,38 @@ pub struct DbConfig {
     #[serde(rename = "dbType")]
     pub db_type: String,
 }
+fn is_cov_type_file(s: &str) -> bool {
+    // println!("查找的目录：{}", s);
+    s.starts_with(COV_TYPE_FILE_PREFIX) && s.ends_with(COV_TYPE_FILE_EXT)
+}
+fn cov_type(file_name: &str) -> String {
+    let file_name = file_name.replace(COV_TYPE_FILE_PREFIX, "");
+    file_name.replace(COV_TYPE_FILE_EXT, "")
+}
 
 pub fn load_env(config_path: &str) -> Result<(), Box<dyn std::error::Error + 'static>> {
     let config = fs::read_to_string(config_path)?; //.expect("读取配置文件失败!")
     let v: EnvConfig = serde_json::from_str(&config)?; //.expect("解析配置文件失败!")
     *(ENV.write()?) = Some(v);
-    let mtf = fs::File::open("./mysql_type.json");
-    match mtf {
-        Ok(mut f) => {
-            let mut contents = String::new();
-            f.read_to_string(&mut contents)?;
-            let mt: HashMap<String, CovType> = serde_json::from_str(&contents)?;
-            COV_SQL_TYPE.write()?.insert(String::from("mysql"), mt);
+    for entry in fs::read_dir(COV_TYPE_PATH)? {
+        let entry = entry.unwrap();
+        let mtf = fs::File::open(entry.path());
+        if let Some(fname) = entry.file_name().to_str() {
+            if is_cov_type_file(fname) {
+                let file_name = cov_type(fname);
+                match mtf {
+                    Ok(mut f) => {
+                        let mut contents = String::new();
+                        f.read_to_string(&mut contents)?;
+                        let mt: HashMap<String, CovType> = serde_json::from_str(&contents)?;
+                        COV_SQL_TYPE.write()?.insert(file_name, mt);
+                    }
+                    _ => (),
+                };
+            }
         }
-        _ => (),
-    };
+    }
+
     Ok(())
 }
 
@@ -100,5 +121,9 @@ pub fn get_ignore_len_type() -> Arc<RwLock<Vec<String>>> {
 }
 
 pub fn get_mysql_cov_type() -> HashMap<String, CovType> {
-    COV_SQL_TYPE.write().unwrap().get("mysql").unwrap().clone()
+    if let Some(t) = COV_SQL_TYPE.write().unwrap().get("mysql") {
+        t.clone()
+    } else {
+        HashMap::<String, CovType>::new()
+    }
 }

@@ -1,9 +1,11 @@
 use erm_tools::core::MdOut;
 use erm_tools::core::{Diff, OutDiff, TableDiff};
 use erm_tools::core::{ErmRead, MysqlRead};
+use erm_tools::core;
 
 #[test]
 fn test_diff_out() {
+    core::load_env("./erm-tools.json").unwrap();
     let mut erm1 = ErmRead::new(vec!["erms/db.erm".to_owned()]);
     let mut erm2 = ErmRead::new(vec!["erms/db2.erm".to_owned()]);
     let mut diff = TableDiff::new(&mut erm1.talbes, &mut erm2.talbes);
@@ -16,9 +18,9 @@ fn test_diff_out() {
 ## tm_test
 |new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|name|character|32|0||name|character|64|0|
-|id_no|varchar|64|0||||||
-||||||email|varchar|64|0|
+|name|char|32|||name|char|64||
+|id_no|varchar|64|||||||
+||||||email|varchar|64||
 
 ## tm_test 索引差异
 |new名称|new字段|new类型||old名称|old字段|old类型|
@@ -29,13 +31,13 @@ fn test_diff_out() {
 ## tm_test2
 |new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|id|integer|0|0||||||
-|name|character|64|0||||||
-|age|integer|0|0||||||
-|birthday|datetime|0|0||||||
-|create_datetime|datetime|0|0||||||
-|last_update_datetime|datetime|0|0||||||
-|email|varchar|64|0||||||
+|id|int||||||||
+|name|char|64|||||||
+|age|int||||||||
+|birthday|datetime||||||||
+|create_datetime|datetime||||||||
+|last_update_datetime|datetime||||||||
+|email|varchar|64|||||||
 
 ## tm_test2 索引差异
 |new名称|new字段|new类型||old名称|old字段|old类型|
@@ -46,17 +48,17 @@ fn test_diff_out() {
 ## tm_test_all
 |new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|id|integer|0|0||||||
-|name|character|32|0||||||
-|last_update_datetime|datetime|0|0||||||
-|id_no|varchar|64|0||||||
-|p1|bigint|0|0||||||
-|p2|bigint|1|0||||||
-|p3|binary1|0|0||||||
-|p4|bit|0|0||||||
-|p5|bit|2|0||||||
-|p6|blob|0|0||||||
-|p7|boolean|0|0||||||
+|id|int||||||||
+|name|char|32|||||||
+|last_update_datetime|datetime||||||||
+|id_no|varchar|64|||||||
+|p1|bigint||||||||
+|p2|bigint||||||||
+|p3|binary1||||||||
+|p4|bit||||||||
+|p5|bit|2|||||||
+|p6|blob||||||||
+|p7|boolean||||||||
 
 ## tm_test_all 索引差异
 |new名称|new字段|new类型||old名称|old字段|old类型|

@@ -3,7 +3,6 @@
         "name": "char"
     },
     "integer": {
-        "name": "int",
-        "length": 10
+        "name": "int"
     }
 }
