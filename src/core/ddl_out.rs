@@ -91,8 +91,105 @@ impl OutDiff for DdlOut {
                     self.content.push_str(&format!("comment '{}'", &dtb.name));
                     self.content.push_str(";");
                     self.content.push_str("\n");
+                } else {
+                    for diff_col in dtb.diff_columns.iter() {
+                        match (diff_col.new_column.as_ref(), diff_col.old_column.as_ref()) {
+                            (Some(new_col), Some(_old_col)) => {
+                                let new_col = new_col.borrow();
+                                // alter table {} modify column {} {};
+                                self.content.push_str(&format!(
+                                    "alter table {} modify column {} {};\n",
+                                    &dtb.name, new_col.physical_name, new_col.column_type
+                                ));
+                            }
+                            (None, Some(old_col)) => {
+                                let old_col = old_col.borrow();
+                                // alter table {} drop column {};
+                                self.content.push_str(&format!(
+                                    "alter table {} drop column {};\n",
+                                    &dtb.name, old_col.physical_name
+                                ));
+                            }
+                            (Some(new_col), None) => {
+                                let new_col = new_col.borrow();
+                                // alter table {} add column {} {};
+                                self.content.push_str(&format!(
+                                    "alter table {} add column {} {};\n",
+                                    &dtb.name, new_col.physical_name, new_col.column_type
+                                ));
+                            }
+                            (_, _) => {}
+                        }
+                    }
+                    for diff_index in dtb.diff_indexes.iter() {
+                        match (diff_index.new_index.as_ref(), diff_index.old_index.as_ref()) {
+                            (Some(new_index), Some(old_index)) => {
+                                let old_index = old_index.borrow();
+                                // drop index {} on {};
+                                self.content.push_str(&format!(
+                                    "drop index {} on {};\n",
+                                    old_index.name, &dtb.name
+                                ));
+                                let new_index = new_index.borrow();
+                                // alter table {} add index/unique {}({});
+                                self.content.push_str(&format!(
+                                    "alter table {} add {} {}({});\n",
+                                    &dtb.name,
+                                    index_type(new_index.non_unique),
+                                    new_index.name,
+                                    new_index.get_cname()
+                                ));
+                            }
+                            (None, Some(old_index)) => {
+                                let old_index = old_index.borrow();
+                                // drop index {} on {};
+                                self.content.push_str(&format!(
+                                    "drop index {} on {};\n",
+                                    old_index.name, &dtb.name
+                                ));
+                            }
+                            (Some(new_index), None) => {
+                                let new_index = new_index.borrow();
+                                // alter table {} add index/unique {}({});
+                                self.content.push_str(&format!(
+                                    "alter table {} add {} {}({});\n",
+                                    &dtb.name,
+                                    index_type(new_index.non_unique),
+                                    new_index.name,
+                                    new_index.get_cname()
+                                ));
+                            }
+                            (_, _) => {}
+                        }
+                    }
+                    if dtb.diff_pks.len() > 0 {
+                        // alter table {} drop primary key;
+                        // alter table {} add primary key({});
+                        let primary_key = dtb
+                            .diff_pks
+                            .iter()
+                            .map(|e| e.new_column.as_ref())
+                            .filter(|e| e.is_some())
+                            .map(|e| e.unwrap().borrow().physical_name.clone())
+                            .collect::<Vec<String>>()
+                            .join(", ");
+                        self.content
+                            .push_str(&format!("alter table {} drop primary key;\n", &dtb.name));
+                        self.content.push_str(&format!(
+                            "alter table {} add primary key({});\n",
+                            &dtb.name, primary_key
+                        ));
+                    }
                 }
             }
         }
+    }
+}
+
+fn index_type(non_unique: bool) -> &'static str {
+    if non_unique {
+        "index"
+    } else {
+        "unique"
     }
 }

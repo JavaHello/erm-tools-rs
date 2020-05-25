@@ -1,7 +1,7 @@
+use erm_tools::core;
 use erm_tools::core::MdOut;
 use erm_tools::core::{Diff, OutDiff, TableDiff};
 use erm_tools::core::{ErmRead, MysqlRead};
-use erm_tools::core;
 
 #[test]
 fn test_diff_out() {

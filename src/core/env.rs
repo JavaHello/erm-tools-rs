@@ -35,6 +35,8 @@ pub struct CovType {
 pub struct EnvConfig {
     #[serde(rename = "diffType")]
     pub diff_type: String,
+    #[serde(rename = "dbType")]
+    pub db_type: String,
     #[serde(rename = "outPath")]
     pub out_path: String,
     #[serde(rename = "genDdl")]
@@ -75,8 +77,6 @@ pub struct DbConfig {
     pub db_password: String,
     #[serde(rename = "dbPort")]
     pub db_port: String,
-    #[serde(rename = "dbType")]
-    pub db_type: String,
 }
 fn is_cov_type_file(s: &str) -> bool {
     // println!("查找的目录：{}", s);

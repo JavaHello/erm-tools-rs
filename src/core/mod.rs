@@ -81,7 +81,7 @@ pub fn exec(env: &mut EnvConfig) {
             let mut source_erm = ErmRead::new(source_erm_list);
 
             for target_db_cfg in target_db_cfg {
-                if "mysql".to_uppercase() == target_db_cfg.db_type.to_uppercase() {
+                if "mysql".to_uppercase() == env.db_type.to_uppercase() {
                     let mut target_db = MysqlRead::new(
                         &format!(
                             "mysql://{}:{}@{}:{}/information_schema",
@@ -125,7 +125,7 @@ pub fn exec(env: &mut EnvConfig) {
             );
 
             for target_db_cfg in target_db_cfg {
-                if "mysql".to_uppercase() == target_db_cfg.db_type.to_uppercase() {
+                if "mysql".to_uppercase() == env.db_type.to_uppercase() {
                     let mut target_db = MysqlRead::new(
                         &format!(
                             "mysql://{}:{}@{}:{}/information_schema",
