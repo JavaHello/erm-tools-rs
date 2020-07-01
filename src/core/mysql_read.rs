@@ -183,15 +183,3 @@ impl TbRead for MysqlRead {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::MysqlRead;
-    #[test]
-    fn test_read_all() {
-        let rd = MysqlRead::new(
-            "mysql://root:123456@localhost:3306/information_schema",
-            "demodb",
-        );
-        assert!(rd.talbes.contains_key("tm_test"));
-    }
-}
