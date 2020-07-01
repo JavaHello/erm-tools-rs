@@ -26,5 +26,6 @@
         "dbPort": "3306"
     }],
     "outPath": "",
-    "genDdl": true
+    "genDdl": true,
+    "genMd": false
 }

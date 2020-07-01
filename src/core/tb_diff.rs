@@ -4,10 +4,12 @@ use crate::model::table::Table;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 
+pub type DiffMap = BTreeMap<String, DiffTable>;
+
 pub struct TableDiff<'a> {
     tb1: &'a mut HashMap<String, Table>,
     tb2: &'a mut HashMap<String, Table>,
-    pub diff: BTreeMap<String, DiffTable>,
+    pub diff: DiffMap,
 }
 
 impl<'a> TableDiff<'a> {
@@ -21,11 +23,7 @@ impl<'a> TableDiff<'a> {
             diff: BTreeMap::new(),
         }
     }
-    fn get_diff(
-        diff: &mut BTreeMap<String, DiffTable>,
-        name: String,
-        desc: String,
-    ) -> &mut DiffTable {
+    fn get_diff(diff: &mut DiffMap, name: String, desc: String) -> &mut DiffTable {
         diff.entry(name.clone()).or_insert(DiffTable {
             name,
             comment: desc,

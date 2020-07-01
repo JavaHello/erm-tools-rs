@@ -78,6 +78,15 @@ pub struct DbConfig {
     #[serde(rename = "dbPort")]
     pub db_port: String,
 }
+
+impl DbConfig {
+    pub fn get_url(&self) -> String {
+        format!(
+            "mysql://{}:{}@{}:{}/information_schema",
+            self.db_user, self.db_password, self.db_host, self.db_port
+        )
+    }
+}
 fn is_cov_type_file(s: &str) -> bool {
     // println!("查找的目录：{}", s);
     s.starts_with(COV_TYPE_FILE_PREFIX) && s.ends_with(COV_TYPE_FILE_EXT)

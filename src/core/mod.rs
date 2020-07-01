@@ -16,7 +16,7 @@ pub use crate::core::env::EnvConfig;
 pub use crate::core::erm_read::ErmRead;
 pub use crate::core::md_out::MdOut;
 pub use crate::core::mysql_read::MysqlRead;
-pub use crate::core::tb_diff::TableDiff;
+pub use crate::core::tb_diff::{DiffMap, TableDiff};
 pub trait Diff {
     fn diff(&mut self);
 }
@@ -62,9 +62,7 @@ pub fn exec(env: &mut EnvConfig) {
 
             let mut diff = TableDiff::new(&mut source_erm.talbes, &mut target_erm.talbes);
             diff.diff();
-            let mut out = MdOut::new(&source_erm_cfg.db_name);
-            out.write(&diff.diff);
-            println!("{}", out.content);
+            diff_out(&diff.diff, env, &source_erm_cfg.db_name);
         }
         "erm-db" => {
             let source_erm_cfg = env.source_erm.take().expect("erm 源文件必须配置");
@@ -82,25 +80,12 @@ pub fn exec(env: &mut EnvConfig) {
 
             for target_db_cfg in target_db_cfg {
                 if "mysql".to_uppercase() == env.db_type.to_uppercase() {
-                    let mut target_db = MysqlRead::new(
-                        &format!(
-                            "mysql://{}:{}@{}:{}/information_schema",
-                            target_db_cfg.db_user,
-                            target_db_cfg.db_password,
-                            target_db_cfg.db_host,
-                            target_db_cfg.db_port
-                        ),
-                        &target_db_cfg.db_name,
-                    );
+                    let mut target_db =
+                        MysqlRead::new(&target_db_cfg.get_url(), &target_db_cfg.db_name);
                     let mut diff = TableDiff::new(&mut source_erm.talbes, &mut target_db.talbes);
                     diff.diff();
-                    let mut out = MdOut::new(&target_db_cfg.db_name);
-                    out.write(&diff.diff);
-                    println!("{}", out.content);
 
-                    let mut out = DdlOut::new(&target_db_cfg.db_name);
-                    out.write(&diff.diff);
-                    println!("{}", out.content);
+                    diff_out(&diff.diff, env, &target_db_cfg.db_name);
                 } else {
                     panic!("不支持的数据库类型");
                 }
@@ -113,34 +98,15 @@ pub fn exec(env: &mut EnvConfig) {
                 .take()
                 .unwrap_or_else(|| vec![env.target_db.take().expect("target db 配置错误")]);
 
-            let mut source_db = MysqlRead::new(
-                &format!(
-                    "mysql://{}:{}@{}:{}/information_schema",
-                    source_db_cfg.db_user,
-                    source_db_cfg.db_password,
-                    source_db_cfg.db_host,
-                    source_db_cfg.db_port
-                ),
-                &source_db_cfg.db_name,
-            );
+            let mut source_db = MysqlRead::new(&source_db_cfg.get_url(), &source_db_cfg.db_name);
 
             for target_db_cfg in target_db_cfg {
                 if "mysql".to_uppercase() == env.db_type.to_uppercase() {
-                    let mut target_db = MysqlRead::new(
-                        &format!(
-                            "mysql://{}:{}@{}:{}/information_schema",
-                            target_db_cfg.db_user,
-                            target_db_cfg.db_password,
-                            target_db_cfg.db_host,
-                            target_db_cfg.db_port
-                        ),
-                        &target_db_cfg.db_name,
-                    );
+                    let mut target_db =
+                        MysqlRead::new(&target_db_cfg.get_url(), &target_db_cfg.db_name);
                     let mut diff = TableDiff::new(&mut source_db.talbes, &mut target_db.talbes);
                     diff.diff();
-                    let mut out = MdOut::new(&target_db_cfg.db_name);
-                    out.write(&diff.diff);
-                    println!("{}", out.content);
+                    diff_out(&diff.diff, env, &target_db_cfg.db_name);
                 } else {
                     panic!("不支持的数据库类型");
                 }
@@ -157,23 +123,26 @@ pub fn exec(env: &mut EnvConfig) {
                 .collect();
 
             let mut target_erm = ErmRead::new(target_erm_list);
-            let mut source_db = MysqlRead::new(
-                &format!(
-                    "mysql://{}:{}@{}:{}/information_schema",
-                    source_db_cfg.db_user,
-                    source_db_cfg.db_password,
-                    source_db_cfg.db_host,
-                    source_db_cfg.db_port
-                ),
-                &source_db_cfg.db_name,
-            );
+            let mut source_db = MysqlRead::new(&source_db_cfg.get_url(), &source_db_cfg.db_name);
 
             let mut diff = TableDiff::new(&mut source_db.talbes, &mut target_erm.talbes);
             diff.diff();
-            let mut out = MdOut::new(&source_db_cfg.db_name);
-            out.write(&diff.diff);
-            println!("{}", out.content);
+            diff_out(&diff.diff, env, &source_db_cfg.db_name);
         }
         _ => panic!("diffType 未知配置项"),
+    }
+}
+
+fn diff_out(diff: &DiffMap, env: &EnvConfig, db_name: &str) {
+    if env.gen_ddl {
+        let mut out = DdlOut::new(db_name);
+        out.write(diff);
+        println!("{}", out.content);
+    }
+
+    if env.gen_md {
+        let mut out = MdOut::new(db_name);
+        out.write(diff);
+        println!("{}", out.content);
     }
 }
