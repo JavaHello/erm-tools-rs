@@ -1,5 +1,5 @@
 use erm_tools::core;
-use erm_tools::core::MdOut;
+use erm_tools::core::{MdOut, DdlOut};
 use erm_tools::core::{Diff, OutDiff, TableDiff};
 use erm_tools::core::{ErmRead, MysqlRead};
 
@@ -68,6 +68,41 @@ fn test_diff_out() {
 ",
         out.content
     );
+    let mut out = DdlOut::new("demodb");
+    out.write(&diff.diff);
+    assert_eq!("-- demodb
+alter table tm_test modify column name char(32);
+alter table tm_test add column id_no varchar(64);
+alter table tm_test drop column email;
+alter table tm_test add index idx_tm_test_name_01(name, age);
+drop index idx_tm_test_name_01 on tm_test;
+create table tm_test2 (
+    id int comment '主键id',
+    name char(64) comment '名称',
+    age int comment '年龄',
+    birthday datetime comment '生日',
+    create_datetime datetime comment '创建时间',
+    last_update_datetime datetime comment '最后修改时间',
+    email varchar(64) comment '邮箱',
+    key (),
+    primary key (id)
+) comment 'tm_test2';
+create table tm_test_all (
+    id int comment '主键id',
+    name char(32) comment '名称',
+    last_update_datetime datetime comment '最后修改时间',
+    id_no varchar(64) comment '身份证号',
+    p1 bigint comment 'p1',
+    p2 bigint comment 'p2',
+    p3 binary1 comment 'p3',
+    p4 bit comment 'p4',
+    p5 bit(2) comment 'p5',
+    p6 blob comment 'p6',
+    p7 boolean comment 'p7',
+    key (id_no asc),
+    primary key (id)
+) comment 'tm_test_all';
+", out.content);
 }
 
 #[test]
