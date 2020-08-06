@@ -13,7 +13,7 @@ const COLUMN_TITLE: &str = "|new名称|new类型|new长度|new精度||old名称|
 ";
 
 const INDEX_TITLE: &str = "|new名称|new字段|new类型||old名称|old字段|old类型|
-|:-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 ";
 
 impl MdOut {

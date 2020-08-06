@@ -137,12 +137,18 @@ fn diff_out(diff: &DiffMap, env: &EnvConfig, db_name: &str) {
     if env.gen_ddl {
         let mut out = DdlOut::new(db_name);
         out.write(diff);
-        println!("{}", out.content);
+        // println!("{}", out.content);
+        write_file(&out.content, &format!("{}/diff.sql", env.out_path));
     }
-
+    
     if env.gen_md {
         let mut out = MdOut::new(db_name);
         out.write(diff);
-        println!("{}", out.content);
+        // println!("{}", out.content);
+        write_file(&out.content, &format!("{}/diff.md", env.out_path));
     }
+}
+
+fn write_file(content: &str, path: &str) {
+    std::fs::write(path, content).unwrap();
 }

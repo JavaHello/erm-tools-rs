@@ -25,7 +25,7 @@
         "dbPassword": "123456",
         "dbPort": "3306"
     }],
-    "outPath": "",
+    "outPath": "target/",
     "genDdl": true,
-    "genMd": false
+    "genMd": true
 }

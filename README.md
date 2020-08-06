@@ -34,7 +34,7 @@
     }],
     "outPath": "", // 输出目录
     "genDdl": true, // 生成 ddl
-    "genMd": false // 生成 md
+    "genMd": true // 生成 md
 }
 
 ```
