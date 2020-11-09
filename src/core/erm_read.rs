@@ -24,6 +24,10 @@ pub struct ErmRead {
     file_list: Vec<String>,
 }
 
+fn parse_erm_error_msg(file_name: &str) -> String {
+    format!("erm 文件解析失败:{}", file_name)
+}
+
 impl ErmRead {
     pub fn new(file_list: Vec<String>) -> ErmRead {
         let mut read = ErmRead {
@@ -40,9 +44,21 @@ impl ErmRead {
             let erm: Diagram = from_str(&data).unwrap();
             let group_word = erm.group_word();
             for it in erm.contents.table.iter() {
-                let pname = it.physical_name.clone();
-                let lname = it.logical_name.clone();
-                let desc = it.description.clone();
+                let pname = it
+                    .physical_name
+                    .as_ref()
+                    .expect(&parse_erm_error_msg(file))
+                    .clone();
+                let lname = it
+                    .logical_name
+                    .as_ref()
+                    .expect(&parse_erm_error_msg(file))
+                    .clone();
+                let desc = it
+                    .description
+                    .as_ref()
+                    .expect(&parse_erm_error_msg(file))
+                    .clone();
                 let mut table = Table {
                     physical_name: pname.clone(),
                     logical_name: lname,
@@ -54,36 +70,87 @@ impl ErmRead {
                 let mut col_map = HashMap::new();
 
                 for ic in it.columns.normal_column.iter() {
-                    let word = group_word.get(&ic.word_id);
+                    let pname = it
+                        .physical_name
+                        .as_ref()
+                        .expect(&parse_erm_error_msg(file))
+                        .clone();
+                    let lname = it
+                        .logical_name
+                        .as_ref()
+                        .expect(&parse_erm_error_msg(file))
+                        .clone();
+                    let word = match &ic.word_id {
+                        Some(word_id) => group_word.get(word_id),
+                        None => None,
+                    };
                     match word {
                         Some(e) => {
                             let col = Rc::new(RefCell::new(Column {
-                                physical_name: e.physical_name.clone(),
-                                logical_name: e.logical_name.clone(),
-                                r#type: e.r#type.clone(),
+                                physical_name: e
+                                    .physical_name
+                                    .as_ref()
+                                    .expect(&parse_erm_error_msg(file))
+                                    .clone(),
+                                logical_name: e
+                                    .logical_name
+                                    .as_ref()
+                                    .expect(&parse_erm_error_msg(file))
+                                    .clone(),
+                                r#type: e
+                                    .r#type
+                                    .as_ref()
+                                    .expect(&parse_erm_error_msg(file))
+                                    .to_owned(),
                                 auto_increment: false,
-                                default_value: Some(ic.default_value.clone()),
-                                length: if let Ok(e) = e.length.parse() {
-                                    Some(e)
-                                } else {
-                                    None
+                                default_value: ic.default_value.clone(),
+                                length: match &e.length {
+                                    Some(e) => match e.parse() {
+                                        Ok(v) => Some(v),
+                                        Err(_) => None,
+                                    },
+                                    None => None,
                                 },
-                                decimal: if let Ok(e) = e.decimal.parse() {
-                                    Some(e)
-                                } else {
-                                    None
+                                decimal: match &e.decimal {
+                                    Some(e) => match e.parse() {
+                                        Ok(v) => Some(v),
+                                        Err(_) => None,
+                                    },
+                                    None => None,
                                 },
-                                primary_key: ic.primary_key.parse().unwrap(),
-                                unique_key: ic.unique_key.parse().unwrap(),
-                                not_null: ic.not_null.parse().unwrap(),
-                                description: Some(e.description.clone()),
+                                primary_key: ic
+                                    .primary_key
+                                    .as_ref()
+                                    .unwrap_or(&"false".to_owned())
+                                    .parse()
+                                    .unwrap_or_default(),
+                                unique_key: ic
+                                    .unique_key
+                                    .as_ref()
+                                    .unwrap_or(&"false".to_owned())
+                                    .parse()
+                                    .unwrap_or_default(),
+                                not_null: ic
+                                    .not_null
+                                    .as_ref()
+                                    .unwrap_or(&"false".to_owned())
+                                    .parse()
+                                    .unwrap_or_default(),
+                                description: e.description.clone(),
                                 desc: false,
-                                column_type: e.r#type.clone(),
+                                column_type: e
+                                    .r#type
+                                    .as_ref()
+                                    .expect(&parse_erm_error_msg(file))
+                                    .to_owned(),
                             }));
                             if col.borrow().primary_key {
                                 table.primary_keys.push(Rc::clone(&col));
                             }
-                            col_map.insert(ic.id.to_owned(), Rc::clone(&col));
+                            col_map.insert(
+                                ic.id.as_ref().expect(&parse_erm_error_msg(file)).to_owned(),
+                                Rc::clone(&col),
+                            );
                             table.columns.push(Rc::clone(&col));
                             let mut col = col.borrow_mut();
                             // 拆分 varchar(n) 这种类型
@@ -124,10 +191,7 @@ impl ErmRead {
                             }
                         }
                         None => {
-                            warn!(
-                                "无法获取的字段 {} - {}",
-                                &ic.physical_name, &ic.logical_name
-                            );
+                            warn!("无法获取的字段 {} - {}", &pname, &lname);
                             continue;
                         }
                     }
@@ -138,14 +202,30 @@ impl ErmRead {
                         .column
                         .iter()
                         .map(|e| {
-                            Rc::clone(col_map.get(&e.id).unwrap_or_else(|| {
-                                panic!("索引配置有错误, table: {}", it.physical_name)
-                            }))
+                            Rc::clone(
+                                col_map
+                                    .get(
+                                        &e.id
+                                            .as_ref()
+                                            .expect(&parse_erm_error_msg(file))
+                                            .to_owned(),
+                                    )
+                                    .unwrap_or_else(|| panic!("索引配置有错误, table: {}", pname)),
+                            )
                         })
                         .collect::<Vec<Rc<RefCell<Column>>>>();
                     let index = Rc::new(RefCell::new(Index {
-                        name: idx.name.clone(),
-                        non_unique: idx.non_unique.parse().unwrap(),
+                        name: idx
+                            .name
+                            .as_ref()
+                            .expect(&parse_erm_error_msg(file))
+                            .to_owned(),
+                        non_unique: idx
+                            .non_unique
+                            .as_ref()
+                            .unwrap_or(&"false".to_owned())
+                            .parse()
+                            .unwrap_or_default(),
                         columns: cols,
                     }));
                     table.indexes.push(index);

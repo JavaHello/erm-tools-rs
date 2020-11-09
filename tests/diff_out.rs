@@ -1,5 +1,5 @@
 use erm_tools::core;
-use erm_tools::core::{MdOut, DdlOut};
+use erm_tools::core::{DdlOut, MdOut};
 use erm_tools::core::{Diff, OutDiff, TableDiff};
 use erm_tools::core::{ErmRead, MysqlRead};
 
@@ -24,7 +24,7 @@ fn test_diff_out() {
 
 ## tm_test 索引差异
 |new名称|new字段|new类型||old名称|old字段|old类型|
-|:-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |idx_tm_test_name_01|name, age|普通|||||
 |||||idx_tm_test_name_01|name|普通|
 
@@ -41,7 +41,7 @@ fn test_diff_out() {
 
 ## tm_test2 索引差异
 |new名称|new字段|new类型||old名称|old字段|old类型|
-|:-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |pk|id|主键|||||
 |idx_tm_test_name_01||普通|||||
 
@@ -62,7 +62,7 @@ fn test_diff_out() {
 
 ## tm_test_all 索引差异
 |new名称|new字段|new类型||old名称|old字段|old类型|
-|:-:|:-:|:-:|:-:|:-:|:-:|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |pk|id|主键|||||
 |Idx_id_no_01|id_no|普通|||||
 ",
@@ -70,7 +70,8 @@ fn test_diff_out() {
     );
     let mut out = DdlOut::new("demodb");
     out.write(&diff.diff);
-    assert_eq!("-- demodb
+    assert_eq!(
+        "-- demodb
 alter table tm_test modify column name char(32);
 alter table tm_test add column id_no varchar(64);
 alter table tm_test drop column email;
@@ -102,7 +103,9 @@ create table tm_test_all (
     key (id_no asc),
     primary key (id)
 ) comment 'tm_test_all';
-", out.content);
+",
+        out.content
+    );
 }
 
 #[test]

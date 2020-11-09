@@ -19,7 +19,11 @@ impl Diagram {
     pub fn group_word(&self) -> HashMap<String, &Word> {
         let mut gm = HashMap::new();
         for it in self.dictionary.words.iter() {
-            gm.insert(it.id.clone(), it);
+            let id = match &it.id {
+                Some(e) => e,
+                None => panic!("erm 文件解析失败, word_id 为空"),
+            };
+            gm.insert(id.clone(), it);
         }
         gm
     }
@@ -39,14 +43,10 @@ pub struct Contents {
 
 #[derive(Debug, Deserialize)]
 pub struct ErmTable {
-    #[serde(rename = "id", default)]
-    id: String,
-    #[serde(rename = "physical_name", default)]
-    pub physical_name: String,
-    #[serde(rename = "logical_name", default)]
-    pub logical_name: String,
-    #[serde(rename = "description", default)]
-    pub description: String,
+    id: Option<String>,
+    pub physical_name: Option<String>,
+    pub logical_name: Option<String>,
+    pub description: Option<String>,
     #[serde(rename = "columns")]
     pub columns: Columns,
     #[serde(rename = "indexes")]
@@ -66,16 +66,12 @@ pub struct Indexes {
 
 #[derive(Debug, Deserialize)]
 pub struct ErmInidex {
-    #[serde(rename = "full_text", default)]
-    full_text: String,
-    #[serde(rename = "non_unique", default)]
-    pub non_unique: String,
-    #[serde(rename = "name", default)]
-    pub name: String,
-    #[serde(rename = "type", default)]
-    r#type: String,
-    #[serde(rename = "description", default)]
-    description: String,
+    full_text: Option<String>,
+    pub non_unique: Option<String>,
+    pub name: Option<String>,
+    #[serde(rename = "type")]
+    r#type: Option<String>,
+    description: Option<String>,
     #[serde(rename = "columns")]
     pub columns: IndexColumns,
 }
@@ -88,76 +84,46 @@ pub struct IndexColumns {
 
 #[derive(Debug, Deserialize)]
 pub struct IndexColumn {
-    #[serde(rename = "id", default)]
-    pub id: String,
-    #[serde(rename = "desc", default)]
-    desc: String,
+    pub id: Option<String>,
+    desc: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct NormalColumn {
-    #[serde(rename = "word_id", default)]
-    pub word_id: String,
-    #[serde(default)]
-    pub id: String,
-    #[serde(default)]
-    pub description: String,
-    #[serde(default)]
-    pub unique_key_name: String,
-    #[serde(default)]
-    pub logical_name: String,
-    #[serde(default)]
-    pub physical_name: String,
-    #[serde(rename = "type", default)]
-    pub r#type: String,
-    #[serde(default)]
-    pub constraint: String,
-    #[serde(default)]
-    pub default_value: String,
-    #[serde(default)]
-    pub auto_increment: String,
-    #[serde(default)]
-    pub foreign_key: String,
-    #[serde(default)]
-    pub not_null: String,
-    #[serde(default)]
-    pub primary_key: String,
-    #[serde(default)]
-    pub unique_key: String,
-    #[serde(default)]
-    pub character_set: String,
-    #[serde(default)]
-    pub collation: String,
+    pub word_id: Option<String>,
+    pub id: Option<String>,
+    pub description: Option<String>,
+    pub unique_key_name: Option<String>,
+    pub logical_name: Option<String>,
+    pub physical_name: Option<String>,
+    #[serde(rename = "type")]
+    pub r#type: Option<String>,
+    pub constraint: Option<String>,
+    pub default_value: Option<String>,
+    pub auto_increment: Option<String>,
+    pub foreign_key: Option<String>,
+    pub not_null: Option<String>,
+    pub primary_key: Option<String>,
+    pub unique_key: Option<String>,
+    pub character_set: Option<String>,
+    pub collation: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Word {
-    #[serde(default)]
-    pub id: String,
-    #[serde(default)]
-    pub length: String,
-    #[serde(default)]
-    pub decimal: String,
-    #[serde(default)]
-    pub array: String,
-    #[serde(default)]
-    pub array_dimension: String,
-    #[serde(default)]
-    pub unsigned: String,
-    #[serde(default)]
-    pub zerofill: String,
-    #[serde(default)]
-    pub binary: String,
-    #[serde(default)]
-    pub args: String,
-    #[serde(default)]
-    pub char_semantics: String,
-    #[serde(default)]
-    pub description: String,
-    #[serde(default)]
-    pub physical_name: String,
-    #[serde(default)]
-    pub logical_name: String,
-    #[serde(rename = "type", default)]
-    pub r#type: String,
+    pub id: Option<String>,
+    pub length: Option<String>,
+    pub decimal: Option<String>,
+    pub array: Option<String>,
+    pub array_dimension: Option<String>,
+    pub unsigned: Option<String>,
+    pub zerofill: Option<String>,
+    pub binary: Option<String>,
+    pub args: Option<String>,
+    pub char_semantics: Option<String>,
+    pub description: Option<String>,
+    pub physical_name: Option<String>,
+    pub logical_name: Option<String>,
+    #[serde(rename = "type")]
+    pub r#type: Option<String>,
 }
