@@ -1,5 +1,6 @@
 use crate::core::OutDiff;
 use crate::model::diff_table::DiffTable;
+use crate::model::table::Column;
 
 use std::collections::BTreeMap;
 #[derive(Default)]
@@ -8,11 +9,11 @@ pub struct MdOut {
     pub db_name: String,
 }
 
-const COLUMN_TITLE: &str = "|new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
+const COLUMN_TITLE: &str = "|S名称|S类型|S长度|S精度||T名称|T类型|T长度|T精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 ";
 
-const INDEX_TITLE: &str = "|new名称|new字段|new类型||old名称|old字段|old类型|
+const INDEX_TITLE: &str = "|S名称|S字段|S类型||T名称|T字段|T类型|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 ";
 
@@ -33,6 +34,14 @@ fn i32_to_str(i: Option<i32>) -> String {
     }
 }
 
+fn type_out(col: &Column) -> String {
+    if col.unsigned {
+        format!("{} {}", "unsigned", col.r#type)
+    } else {
+        col.r#type.to_string()
+    }
+}
+
 impl OutDiff for MdOut {
     fn write(&mut self, diff_tables: &BTreeMap<String, DiffTable>) {
         if !diff_tables.is_empty() {
@@ -42,24 +51,24 @@ impl OutDiff for MdOut {
                 self.content.push_str(&format!("\n## {}\n", k));
                 self.content.push_str(COLUMN_TITLE);
                 for dcol in dtb.diff_columns.iter() {
-                    if let Some(col) = &dcol.new_column {
+                    if let Some(col) = &dcol.source_column {
                         let col = (*col).borrow();
                         self.content.push_str(&format!(
                             "|{}|{}|{}|{}|",
                             col.physical_name,
-                            col.r#type,
+                            type_out(&col),
                             i32_to_str(col.length),
                             i32_to_str(col.decimal)
                         ));
                     } else {
                         self.content.push_str("|||||");
                     }
-                    if let Some(col) = &dcol.old_column {
+                    if let Some(col) = &dcol.target_column {
                         let col = (*col).borrow();
                         self.content.push_str(&format!(
                             "|{}|{}|{}|{}|",
                             col.physical_name,
-                            col.r#type,
+                            type_out(&col),
                             i32_to_str(col.length),
                             i32_to_str(col.decimal)
                         ));
@@ -75,14 +84,14 @@ impl OutDiff for MdOut {
                 }
 
                 for dcol in dtb.diff_pks.iter() {
-                    if let Some(col) = &dcol.new_column {
+                    if let Some(col) = &dcol.source_column {
                         let col = (*col).borrow();
                         self.content
                             .push_str(&format!("|pk|{}|主键|", col.physical_name));
                     } else {
                         self.content.push_str("||||");
                     }
-                    if let Some(col) = &dcol.old_column {
+                    if let Some(col) = &dcol.target_column {
                         let col = (*col).borrow();
                         self.content
                             .push_str(&format!("|pk|{}|主键|", col.physical_name));
@@ -93,7 +102,7 @@ impl OutDiff for MdOut {
                 }
 
                 for dcol in dtb.diff_indexes.iter() {
-                    if let Some(col) = &dcol.new_index {
+                    if let Some(col) = &dcol.source_index {
                         let col = (*col).borrow();
                         if col.non_unique {
                             self.content.push_str(&format!(
@@ -111,7 +120,7 @@ impl OutDiff for MdOut {
                     } else {
                         self.content.push_str("||||");
                     }
-                    if let Some(col) = &dcol.old_index {
+                    if let Some(col) = &dcol.target_index {
                         let col = (*col).borrow();
                         if col.non_unique {
                             self.content.push_str(&format!(

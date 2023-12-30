@@ -36,7 +36,7 @@ impl OutDiff for DdlOut {
                     self.content.push_str(&format!("create table {} ", tn));
                     self.content.push_str("(\n");
                     for ntb in dtb.diff_columns.iter() {
-                        if let Some(col) = &ntb.new_column {
+                        if let Some(col) = &ntb.source_column {
                             let col = col.borrow();
                             self.content.push_str(INDENT_STR);
                             self.content.push_str(&format!(
@@ -48,7 +48,7 @@ impl OutDiff for DdlOut {
                     }
 
                     for nidx in dtb.diff_indexes.iter() {
-                        if let Some(idx) = &nidx.new_index {
+                        if let Some(idx) = &nidx.source_index {
                             let idx = idx.borrow();
                             self.content.push_str(INDENT_STR);
                             if idx.non_unique {
@@ -76,7 +76,7 @@ impl OutDiff for DdlOut {
                     let mut pk_cols: Option<String> = None;
                     for npk in dtb.diff_pks.iter() {
                         let mut col_str = String::new();
-                        if let Some(col) = &npk.new_column {
+                        if let Some(col) = &npk.source_column {
                             let col = col.borrow();
                             col_str.push_str(&col.physical_name);
                         }
@@ -93,7 +93,10 @@ impl OutDiff for DdlOut {
                     self.content.push('\n');
                 } else {
                     for diff_col in dtb.diff_columns.iter() {
-                        match (diff_col.new_column.as_ref(), diff_col.old_column.as_ref()) {
+                        match (
+                            diff_col.source_column.as_ref(),
+                            diff_col.target_column.as_ref(),
+                        ) {
                             (Some(new_col), Some(_old_col)) => {
                                 let new_col = new_col.borrow();
                                 // alter table {} modify column {} {};
@@ -122,7 +125,10 @@ impl OutDiff for DdlOut {
                         }
                     }
                     for diff_index in dtb.diff_indexes.iter() {
-                        match (diff_index.new_index.as_ref(), diff_index.old_index.as_ref()) {
+                        match (
+                            diff_index.source_index.as_ref(),
+                            diff_index.target_index.as_ref(),
+                        ) {
                             (Some(new_index), Some(old_index)) => {
                                 let old_index = old_index.borrow();
                                 // drop index {} on {};
@@ -168,7 +174,7 @@ impl OutDiff for DdlOut {
                         let primary_key = dtb
                             .diff_pks
                             .iter()
-                            .map(|e| e.new_column.as_ref())
+                            .map(|e| e.source_column.as_ref())
                             .filter(|e| e.is_some())
                             .map(|e| e.unwrap().borrow().physical_name.clone())
                             .collect::<Vec<String>>()

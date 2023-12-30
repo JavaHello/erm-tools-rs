@@ -14,12 +14,12 @@ pub struct DiffTable {
 #[derive(Debug)]
 pub struct DiffColumn {
     pub name: String,
-    pub old_column: Option<Rc<RefCell<Column>>>,
-    pub new_column: Option<Rc<RefCell<Column>>>,
+    pub target_column: Option<Rc<RefCell<Column>>>,
+    pub source_column: Option<Rc<RefCell<Column>>>,
 }
 #[derive(Debug)]
 pub struct DiffIndex {
     pub name: String,
-    pub old_index: Option<Rc<RefCell<Index>>>,
-    pub new_index: Option<Rc<RefCell<Index>>>,
+    pub target_index: Option<Rc<RefCell<Index>>>,
+    pub source_index: Option<Rc<RefCell<Index>>>,
 }

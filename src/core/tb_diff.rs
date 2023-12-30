@@ -53,8 +53,8 @@ impl Diff for TableDiff<'_> {
 
                             dtb.diff_columns.push(DiffColumn {
                                 name: ric1.physical_name.clone(),
-                                new_column: Some(ic1.clone()),
-                                old_column: Some(ic2.clone()),
+                                source_column: Some(ic1.clone()),
+                                target_column: Some(ic2.clone()),
                             });
                         }
                     } else {
@@ -65,8 +65,8 @@ impl Diff for TableDiff<'_> {
                         );
                         dtb.diff_columns.push(DiffColumn {
                             name: ric1.physical_name.clone(),
-                            new_column: Some(ic1.clone()),
-                            old_column: None,
+                            source_column: Some(ic1.clone()),
+                            target_column: None,
                         });
                     }
                 }
@@ -76,8 +76,8 @@ impl Diff for TableDiff<'_> {
                         TableDiff::get_diff(&mut self.diff, k1.clone(), v1.logical_name.clone());
                     dtb.diff_columns.push(DiffColumn {
                         name: ricv2.physical_name.clone(),
-                        new_column: None,
-                        old_column: Some((*icv2).clone()),
+                        source_column: None,
+                        target_column: Some((*icv2).clone()),
                     });
                 }
 
@@ -93,8 +93,8 @@ impl Diff for TableDiff<'_> {
                         );
                         dtb.diff_pks.push(DiffColumn {
                             name: ric1.physical_name.clone(),
-                            new_column: Some(ic1.clone()),
-                            old_column: None,
+                            source_column: Some(ic1.clone()),
+                            target_column: None,
                         });
                     }
                 }
@@ -104,8 +104,8 @@ impl Diff for TableDiff<'_> {
                         TableDiff::get_diff(&mut self.diff, k1.clone(), v1.logical_name.clone());
                     dtb.diff_pks.push(DiffColumn {
                         name: ricv2.physical_name.clone(),
-                        new_column: None,
-                        old_column: Some((*icv2).clone()),
+                        source_column: None,
+                        target_column: Some((*icv2).clone()),
                     });
                 }
 
@@ -123,8 +123,8 @@ impl Diff for TableDiff<'_> {
 
                             dtb.diff_indexes.push(DiffIndex {
                                 name: ric1.name.clone(),
-                                new_index: Some(ic1.clone()),
-                                old_index: Some(ic2.clone()),
+                                source_index: Some(ic1.clone()),
+                                target_index: Some(ic2.clone()),
                             });
                         }
                     } else {
@@ -135,8 +135,8 @@ impl Diff for TableDiff<'_> {
                         );
                         dtb.diff_indexes.push(DiffIndex {
                             name: ric1.name.clone(),
-                            new_index: Some(ic1.clone()),
-                            old_index: None,
+                            source_index: Some(ic1.clone()),
+                            target_index: None,
                         });
                     }
                 }
@@ -146,8 +146,8 @@ impl Diff for TableDiff<'_> {
                         TableDiff::get_diff(&mut self.diff, k1.clone(), v1.logical_name.clone());
                     dtb.diff_indexes.push(DiffIndex {
                         name: ricv2.name.clone(),
-                        new_index: None,
-                        old_index: Some((*icv2).clone()),
+                        source_index: None,
+                        target_index: Some((*icv2).clone()),
                     });
                 }
             } else {
@@ -162,8 +162,8 @@ impl Diff for TableDiff<'_> {
                             .iter()
                             .map(|e| DiffColumn {
                                 name: e.borrow().physical_name.clone(),
-                                new_column: Some(e.clone()),
-                                old_column: None,
+                                source_column: Some(e.clone()),
+                                target_column: None,
                             })
                             .collect(),
                         diff_indexes: v1
@@ -171,8 +171,8 @@ impl Diff for TableDiff<'_> {
                             .iter()
                             .map(|e| DiffIndex {
                                 name: e.borrow().name.clone(),
-                                old_index: None,
-                                new_index: Some(e.clone()),
+                                target_index: None,
+                                source_index: Some(e.clone()),
                             })
                             .collect(),
                         diff_pks: v1
@@ -180,8 +180,8 @@ impl Diff for TableDiff<'_> {
                             .iter()
                             .map(|e| DiffColumn {
                                 name: e.borrow().physical_name.clone(),
-                                new_column: Some(e.clone()),
-                                old_column: None,
+                                source_column: Some(e.clone()),
+                                target_column: None,
                             })
                             .collect(),
                     },
