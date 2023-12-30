@@ -16,4 +16,3 @@ quick-xml = { version = "0.31.0", features = [ "serialize" ] }
 log = "0.4"
 mysql = "*"
 clap = { version = "4.4.12", features = ["derive"] }
-lazy_static = "1.4.0"

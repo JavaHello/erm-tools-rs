@@ -89,10 +89,8 @@ impl MysqlRead {
                         let column_type: String = column_type;
                         let extra: String = extra;
                         let column_default: Option<String> = column_default;
-                        let ignore_type = env::get_ignore_len_type()
-                            .read()
-                            .unwrap()
-                            .contains(&data_type.to_lowercase());
+                        let ignore_type =
+                            env::get_ignore_len_type().contains(&data_type.to_lowercase());
                         let mut len = if let Some(v) = character_maximum_length {
                             Some(v)
                         } else {

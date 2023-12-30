@@ -31,12 +31,6 @@ pub fn load_env(config_path: &str) -> Result<(), Box<dyn std::error::Error + 'st
 
 pub fn env() -> EnvConfig {
     env::get_env()
-        .as_ref()
-        .read()
-        .unwrap()
-        .as_ref()
-        .unwrap()
-        .clone()
 }
 
 pub fn exec(env: &mut EnvConfig) {
@@ -140,7 +134,7 @@ fn diff_out(diff: &DiffMap, env: &EnvConfig, db_name: &str) {
         // println!("{}", out.content);
         write_file(&out.content, &format!("{}/diff.sql", env.out_path));
     }
-    
+
     if env.gen_md {
         let mut out = MdOut::new(db_name);
         out.write(diff);

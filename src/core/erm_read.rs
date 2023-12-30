@@ -166,10 +166,8 @@ impl ErmRead {
                             if cidx > 0 {
                                 col.r#type = String::from(col.r#type.get(..cidx).unwrap());
                             }
-                            let ignore_type = env::get_ignore_len_type()
-                                .read()
-                                .unwrap()
-                                .contains(&col.r#type.to_lowercase());
+                            let ignore_type =
+                                env::get_ignore_len_type().contains(&col.r#type.to_lowercase());
                             if ignore_type {
                                 col.length = None;
                                 col.decimal = None;
