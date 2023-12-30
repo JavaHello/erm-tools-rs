@@ -66,7 +66,7 @@ impl OutDiff for MdOut {
                     } else {
                         self.content.push_str("|||||");
                     }
-                    self.content.push_str("\n");
+                    self.content.push('\n');
                 }
 
                 if !dtb.diff_pks.is_empty() || !dtb.diff_indexes.is_empty() {
@@ -89,7 +89,7 @@ impl OutDiff for MdOut {
                     } else {
                         self.content.push_str("||||");
                     }
-                    self.content.push_str("\n");
+                    self.content.push('\n');
                 }
 
                 for dcol in dtb.diff_indexes.iter() {
@@ -126,7 +126,7 @@ impl OutDiff for MdOut {
                     } else {
                         self.content.push_str("||||");
                     }
-                    self.content.push_str("\n");
+                    self.content.push('\n');
                 }
             }
         }

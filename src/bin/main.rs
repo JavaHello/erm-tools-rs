@@ -1,8 +1,8 @@
 use erm_tools::core;
 
-use clap::Clap;
+use clap::Parser;
 
-#[derive(Debug, Clap)]
+#[derive(Debug, Parser)]
 #[clap(version = "1.0", author = "luokai")]
 struct Opts {
     #[clap(short, long, default_value = "erm-tools.json")]

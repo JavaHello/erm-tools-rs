@@ -14,12 +14,13 @@ lazy_static! {
         Arc::new(RwLock::new(HashMap::new()));
     pub static ref ENV: Arc<RwLock<Option<EnvConfig>>> = Arc::new(RwLock::new(None));
     pub static ref IGNORE_LEN_TYPE: Arc<RwLock<Vec<String>>> = {
-        let mut t = Vec::new();
-        t.push("int".to_owned());
-        t.push("integer".to_owned());
-        t.push("bigint".to_owned());
-        t.push("date".to_owned());
-        t.push("datetime".to_owned());
+        let t = vec![
+            "int".to_owned(),
+            "integer".to_owned(),
+            "bigint".to_owned(),
+            "date".to_owned(),
+            "datetime".to_owned(),
+        ];
         Arc::new(RwLock::new(t))
     };
 }
@@ -106,14 +107,11 @@ pub fn load_env(config_path: &str) -> Result<(), Box<dyn std::error::Error + 'st
         if let Some(fname) = entry.file_name().to_str() {
             if is_cov_type_file(fname) {
                 let file_name = cov_type(fname);
-                match mtf {
-                    Ok(mut f) => {
-                        let mut contents = String::new();
-                        f.read_to_string(&mut contents)?;
-                        let mt: HashMap<String, CovType> = serde_json::from_str(&contents)?;
-                        COV_SQL_TYPE.write()?.insert(file_name, mt);
-                    }
-                    _ => (),
+                if let Ok(mut f) = mtf {
+                    let mut contents = String::new();
+                    f.read_to_string(&mut contents)?;
+                    let mt: HashMap<String, CovType> = serde_json::from_str(&contents)?;
+                    COV_SQL_TYPE.write()?.insert(file_name, mt);
                 };
             }
         }

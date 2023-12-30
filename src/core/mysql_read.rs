@@ -95,16 +95,14 @@ impl MysqlRead {
                             .contains(&data_type.to_lowercase());
                         let mut len = if let Some(v) = character_maximum_length {
                             Some(v)
-                        } else if let Some(v) = numeric_precision {
-                            Some(v)
                         } else {
-                            None
+                            numeric_precision
                         };
                         if ignore_type {
                             len = None;
                             numeric_scale = None;
                         }
-                        let col_type = if column_type != "" && !ignore_type {
+                        let col_type = if !column_type.is_empty() && !ignore_type {
                             column_type
                         } else {
                             data_type.clone()
@@ -112,6 +110,7 @@ impl MysqlRead {
                         let col = Rc::new(RefCell::new(Column {
                             physical_name: column_name.clone(),
                             logical_name: column_comment,
+                            unsigned: data_type.contains("unsigned"),
                             r#type: data_type,
                             auto_increment: "auto_increment" == extra,
                             default_value: column_default,
@@ -182,4 +181,3 @@ impl TbRead for MysqlRead {
         self.talbes.get(name)
     }
 }
-

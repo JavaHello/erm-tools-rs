@@ -44,7 +44,7 @@ impl Diff for TableDiff<'_> {
                     let ric1 = (*ic1).borrow();
                     if let Some(ic2) = col_map.remove(&ric1.physical_name) {
                         let ric2 = (*ic2).borrow();
-                        if ric1.column_type != ric2.column_type {
+                        if ric1.column_type != ric2.column_type || ric1.unsigned != ric2.unsigned {
                             let dtb = TableDiff::get_diff(
                                 &mut self.diff,
                                 k1.clone(),

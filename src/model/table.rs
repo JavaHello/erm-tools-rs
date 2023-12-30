@@ -18,6 +18,7 @@ pub struct Column {
     pub physical_name: String,
     pub logical_name: String,
     pub r#type: String,
+    pub unsigned: bool,
     pub auto_increment: bool,
     pub default_value: Option<String>,
     pub length: Option<i32>,

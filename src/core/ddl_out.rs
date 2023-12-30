@@ -43,7 +43,7 @@ impl OutDiff for DdlOut {
                                 "{} {} comment '{}',",
                                 &col.physical_name, &col.column_type, &col.logical_name
                             ));
-                            self.content.push_str("\n");
+                            self.content.push('\n');
                         }
                     }
 
@@ -69,7 +69,7 @@ impl OutDiff for DdlOut {
                                 .collect::<Vec<String>>()
                                 .join(", ");
                             self.content.push_str(&format!("({}),", col_str));
-                            self.content.push_str("\n");
+                            self.content.push('\n');
                         }
                     }
 
@@ -85,12 +85,12 @@ impl OutDiff for DdlOut {
                     if let Some(col_str) = pk_cols {
                         self.content.push_str(INDENT_STR);
                         self.content.push_str(&format!("primary key ({})", col_str));
-                        self.content.push_str("\n");
+                        self.content.push('\n');
                     }
                     self.content.push_str(") ");
                     self.content.push_str(&format!("comment '{}'", &dtb.name));
-                    self.content.push_str(";");
-                    self.content.push_str("\n");
+                    self.content.push(';');
+                    self.content.push('\n');
                 } else {
                     for diff_col in dtb.diff_columns.iter() {
                         match (diff_col.new_column.as_ref(), diff_col.old_column.as_ref()) {
@@ -162,7 +162,7 @@ impl OutDiff for DdlOut {
                             (_, _) => {}
                         }
                     }
-                    if dtb.diff_pks.len() > 0 {
+                    if !dtb.diff_pks.is_empty() {
                         // alter table {} drop primary key;
                         // alter table {} add primary key({});
                         let primary_key = dtb

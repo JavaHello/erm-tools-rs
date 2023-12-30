@@ -3,8 +3,8 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 pub struct ErmObj {
-    file_name: String,
-    diagram: Diagram,
+    pub file_name: String,
+    pub diagram: Diagram,
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,7 +43,7 @@ pub struct Contents {
 
 #[derive(Debug, Deserialize)]
 pub struct ErmTable {
-    id: Option<String>,
+    pub id: Option<String>,
     pub physical_name: Option<String>,
     pub logical_name: Option<String>,
     pub description: Option<String>,
@@ -66,12 +66,12 @@ pub struct Indexes {
 
 #[derive(Debug, Deserialize)]
 pub struct ErmInidex {
-    full_text: Option<String>,
+    pub full_text: Option<String>,
     pub non_unique: Option<String>,
     pub name: Option<String>,
     #[serde(rename = "type")]
-    r#type: Option<String>,
-    description: Option<String>,
+    pub r#type: Option<String>,
+    pub description: Option<String>,
     #[serde(rename = "columns")]
     pub columns: IndexColumns,
 }
@@ -85,7 +85,7 @@ pub struct IndexColumns {
 #[derive(Debug, Deserialize)]
 pub struct IndexColumn {
     pub id: Option<String>,
-    desc: Option<String>,
+    pub desc: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

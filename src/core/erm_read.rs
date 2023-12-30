@@ -40,24 +40,24 @@ impl ErmRead {
     fn init(&mut self) {
         let cov_type = env::get_mysql_cov_type();
         for file in self.file_list.iter() {
-            let data = read_xml(&file);
+            let data = read_xml(file);
             let erm: Diagram = from_str(&data).unwrap();
             let group_word = erm.group_word();
             for it in erm.contents.table.iter() {
                 let pname = it
                     .physical_name
                     .as_ref()
-                    .expect(&parse_erm_error_msg(file))
+                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                     .clone();
                 let lname = it
                     .logical_name
                     .as_ref()
-                    .expect(&parse_erm_error_msg(file))
+                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                     .clone();
                 let desc = it
                     .description
                     .as_ref()
-                    .expect(&parse_erm_error_msg(file))
+                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                     .clone();
                 let mut table = Table {
                     physical_name: pname.clone(),
@@ -73,12 +73,12 @@ impl ErmRead {
                     let pname = it
                         .physical_name
                         .as_ref()
-                        .expect(&parse_erm_error_msg(file))
+                        .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                         .clone();
                     let lname = it
                         .logical_name
                         .as_ref()
-                        .expect(&parse_erm_error_msg(file))
+                        .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                         .clone();
                     let word = match &ic.word_id {
                         Some(word_id) => group_word.get(word_id),
@@ -90,18 +90,23 @@ impl ErmRead {
                                 physical_name: e
                                     .physical_name
                                     .as_ref()
-                                    .expect(&parse_erm_error_msg(file))
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .clone(),
                                 logical_name: e
                                     .logical_name
                                     .as_ref()
-                                    .expect(&parse_erm_error_msg(file))
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .clone(),
                                 r#type: e
                                     .r#type
                                     .as_ref()
-                                    .expect(&parse_erm_error_msg(file))
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .to_owned(),
+                                unsigned: e
+                                    .unsigned
+                                    .as_ref()
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
+                                    .eq("true"),
                                 auto_increment: false,
                                 default_value: ic.default_value.clone(),
                                 length: match &e.length {
@@ -141,14 +146,17 @@ impl ErmRead {
                                 column_type: e
                                     .r#type
                                     .as_ref()
-                                    .expect(&parse_erm_error_msg(file))
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .to_owned(),
                             }));
                             if col.borrow().primary_key {
                                 table.primary_keys.push(Rc::clone(&col));
                             }
                             col_map.insert(
-                                ic.id.as_ref().expect(&parse_erm_error_msg(file)).to_owned(),
+                                ic.id
+                                    .as_ref()
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
+                                    .to_owned(),
                                 Rc::clone(&col),
                             );
                             table.columns.push(Rc::clone(&col));
@@ -184,10 +192,13 @@ impl ErmRead {
                                     col.column_type
                                         .push_str(&format!("{}{}{}", ", ", decimal, ")"));
                                 } else {
-                                    col.column_type.push_str(")");
+                                    col.column_type.push(')');
                                 }
                             } else {
                                 col.column_type = col.r#type.clone();
+                            }
+                            if col.unsigned {
+                                col.column_type = format!("{} {}", "unsigned", col.r#type);
                             }
                         }
                         None => {
@@ -207,7 +218,9 @@ impl ErmRead {
                                     .get(
                                         &e.id
                                             .as_ref()
-                                            .expect(&parse_erm_error_msg(file))
+                                            .unwrap_or_else(|| {
+                                                panic!("{}", parse_erm_error_msg(file))
+                                            })
                                             .to_owned(),
                                     )
                                     .unwrap_or_else(|| panic!("索引配置有错误, table: {}", pname)),
@@ -218,7 +231,7 @@ impl ErmRead {
                         name: idx
                             .name
                             .as_ref()
-                            .expect(&parse_erm_error_msg(file))
+                            .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                             .to_owned(),
                         non_unique: idx
                             .non_unique
