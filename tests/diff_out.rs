@@ -16,20 +16,20 @@ fn test_diff_out() {
         "# demodb差异输出
 
 ## tm_test
-|new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
+|S名称|S类型|S长度|S精度||T名称|T类型|T长度|T精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |name|char|32|||name|char|64||
 |id_no|varchar|64|||||||
 ||||||email|varchar|64||
 
 ## tm_test 索引差异
-|new名称|new字段|new类型||old名称|old字段|old类型|
+|S名称|S字段|S类型||T名称|T字段|T类型|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |idx_tm_test_name_01|name, age|普通|||||
 |||||idx_tm_test_name_01|name|普通|
 
 ## tm_test2
-|new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
+|S名称|S类型|S长度|S精度||T名称|T类型|T长度|T精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |id|int||||||||
 |name|char|64|||||||
@@ -40,13 +40,13 @@ fn test_diff_out() {
 |email|varchar|64|||||||
 
 ## tm_test2 索引差异
-|new名称|new字段|new类型||old名称|old字段|old类型|
+|S名称|S字段|S类型||T名称|T字段|T类型|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |pk|id|主键|||||
 |idx_tm_test_name_01||普通|||||
 
 ## tm_test_all
-|new名称|new类型|new长度|new精度||old名称|old类型|old长度|old精度|
+|S名称|S类型|S长度|S精度||T名称|T类型|T长度|T精度|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |id|int||||||||
 |name|char|32|||||||
@@ -61,7 +61,7 @@ fn test_diff_out() {
 |p7|boolean||||||||
 
 ## tm_test_all 索引差异
-|new名称|new字段|new类型||old名称|old字段|old类型|
+|S名称|S字段|S类型||T名称|T字段|T类型|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |pk|id|主键|||||
 |Idx_id_no_01|id_no|普通|||||
