@@ -10,20 +10,10 @@ const COV_TYPE_FILE_EXT: &str = ".json";
 const COV_TYPE_PATH: &str = "./conf/";
 
 static ENV: OnceLock<EnvConfig> = OnceLock::new();
-static IGNORE_LEN_TYPE: OnceLock<Vec<String>> = OnceLock::new();
 type CovRw = Arc<RwLock<HashMap<String, HashMap<String, CovType>>>>;
 static COV_SQL_TYPE: OnceLock<CovRw> = OnceLock::new();
 
 fn init() {
-    IGNORE_LEN_TYPE
-        .set(vec![
-            "int".to_owned(),
-            "integer".to_owned(),
-            "bigint".to_owned(),
-            "date".to_owned(),
-            "datetime".to_owned(),
-        ])
-        .unwrap();
     COV_SQL_TYPE
         .set(Arc::new(RwLock::new(HashMap::new())))
         .unwrap();
@@ -131,9 +121,6 @@ fn cov_sql_type<'a>() -> &'a Arc<RwLock<HashMap<String, HashMap<String, CovType>
 
 pub fn get_env() -> EnvConfig {
     ENV.get().unwrap().clone()
-}
-pub fn get_ignore_len_type<'a>() -> &'a Vec<String> {
-    IGNORE_LEN_TYPE.get().unwrap()
 }
 
 pub fn get_mysql_cov_type() -> HashMap<String, CovType> {

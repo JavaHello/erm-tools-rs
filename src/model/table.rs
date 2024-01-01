@@ -16,8 +16,8 @@ pub struct Table {
 #[derive(Debug, Clone)]
 pub struct Column {
     pub physical_name: String,
-    pub logical_name: String,
-    pub r#type: String,
+    pub comment: String,
+    pub data_type: String,
     pub unsigned: bool,
     pub auto_increment: bool,
     pub default_value: Option<String>,

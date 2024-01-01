@@ -36,9 +36,9 @@ fn i32_to_str(i: Option<i32>) -> String {
 
 fn type_out(col: &Column) -> String {
     if col.unsigned {
-        format!("{} {}", "unsigned", col.r#type)
+        format!("{} {}", col.data_type, "unsigned")
     } else {
-        col.r#type.to_string()
+        col.data_type.to_string()
     }
 }
 

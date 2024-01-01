@@ -92,12 +92,12 @@ impl ErmRead {
                                     .as_ref()
                                     .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .clone(),
-                                logical_name: e
+                                comment: e
                                     .logical_name
                                     .as_ref()
                                     .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .clone(),
-                                r#type: e
+                                data_type: e
                                     .r#type
                                     .as_ref()
                                     .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
@@ -107,7 +107,11 @@ impl ErmRead {
                                     .as_ref()
                                     .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
                                     .eq("true"),
-                                auto_increment: false,
+                                auto_increment: ic
+                                    .auto_increment
+                                    .as_ref()
+                                    .unwrap_or_else(|| panic!("{}", parse_erm_error_msg(file)))
+                                    .eq("true"),
                                 default_value: ic.default_value.clone(),
                                 length: match &e.length {
                                     Some(e) => match e.parse() {
@@ -162,29 +166,18 @@ impl ErmRead {
                             table.columns.push(Rc::clone(&col));
                             let mut col = col.borrow_mut();
                             // 拆分 varchar(n) 这种类型
-                            let cidx: usize = col.r#type.find('(').unwrap_or_default();
+                            let cidx: usize = col.data_type.find('(').unwrap_or_default();
                             if cidx > 0 {
-                                col.r#type = String::from(col.r#type.get(..cidx).unwrap());
+                                col.data_type = String::from(col.data_type.get(..cidx).unwrap());
                             }
-                            let ignore_type =
-                                env::get_ignore_len_type().contains(&col.r#type.to_lowercase());
-                            if ignore_type {
-                                col.length = None;
-                                col.decimal = None;
-                            }
-                            if let Some(cfg_type) = cov_type.get(&col.r#type) {
-                                col.r#type = cfg_type.name.clone();
+                            if let Some(cfg_type) = cov_type.get(&col.data_type) {
+                                col.data_type = cfg_type.name.clone();
                                 if let Some(len) = cfg_type.length {
                                     col.length = Some(len);
                                 }
                             }
-                            if cidx > 0 && !ignore_type {
-                                col.column_type = format!(
-                                    "{}{}{}",
-                                    col.r#type,
-                                    "(",
-                                    col.length.unwrap_or_default()
-                                );
+                            if let Some(length) = col.length {
+                                col.column_type = format!("{}{}{}", col.data_type, "(", length);
 
                                 if let Some(decimal) = col.decimal {
                                     col.column_type
@@ -193,10 +186,10 @@ impl ErmRead {
                                     col.column_type.push(')');
                                 }
                             } else {
-                                col.column_type = col.r#type.clone();
+                                col.column_type = col.data_type.clone();
                             }
                             if col.unsigned {
-                                col.column_type = format!("{} {}", "unsigned", col.r#type);
+                                col.column_type = format!("{} {}", col.data_type, "unsigned");
                             }
                         }
                         None => {

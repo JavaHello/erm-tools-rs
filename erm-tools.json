@@ -1,5 +1,5 @@
 {
-    "diffType": "erm-db",
+    "diffType": "db-db",
     "dbType": "mysql",
     "sourceErmFile": {
         "dbName": "demodb",
@@ -12,14 +12,14 @@
         "ermFiles": ["db2.erm"]
     },
     "sourceDb": {
-        "dbName": "demodb",
+        "dbName": "demo01",
         "dbHost": "127.0.0.1",
         "dbUser": "root",
         "dbPassword": "123456",
         "dbPort": "3306"
     },
     "targetDbList": [{
-        "dbName": "demodb",
+        "dbName": "demo02",
         "dbHost": "127.0.0.1",
         "dbUser": "root",
         "dbPassword": "123456",

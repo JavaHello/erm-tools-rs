@@ -1033,6 +1033,10 @@
 					<type></type>
 					<description></description>
 					<columns>
+						<column>
+							<id>8</id>
+							<desc>false</desc>
+						</column>
 					</columns>
 				</inidex>
 			</indexes>

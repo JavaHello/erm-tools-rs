@@ -39,10 +39,23 @@ impl OutDiff for DdlOut {
                         if let Some(col) = &ntb.source_column {
                             let col = col.borrow();
                             self.content.push_str(INDENT_STR);
-                            self.content.push_str(&format!(
-                                "{} {} comment '{}',",
-                                &col.physical_name, &col.column_type, &col.logical_name
-                            ));
+                            self.content
+                                .push_str(&format!("{} {} ", &col.physical_name, &col.column_type));
+
+                            if col.auto_increment {
+                                self.content.push_str("auto_increment ");
+                            }
+
+                            if col.not_null {
+                                self.content.push_str("not null ");
+                            }
+                            if let Some(default) = &col.default_value {
+                                if !default.is_empty() {
+                                    self.content.push_str(&format!("default {} ", default));
+                                }
+                            }
+                            self.content
+                                .push_str(&format!("comment '{}',", &col.comment));
                             self.content.push('\n');
                         }
                     }
@@ -56,6 +69,7 @@ impl OutDiff for DdlOut {
                             } else {
                                 self.content.push_str("unique key ");
                             }
+                            self.content.push_str(&idx.name);
                             let col_str = idx
                                 .columns
                                 .iter()
