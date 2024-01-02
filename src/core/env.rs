@@ -22,8 +22,8 @@ fn init() {
 #[derive(Deserialize, Clone, Debug)]
 pub struct CovType {
     pub name: String,
-    pub length: Option<i32>,
-    pub decimal: Option<i32>,
+    pub length: Option<i64>,
+    pub decimal: Option<i64>,
 }
 
 #[derive(Deserialize, Clone, Debug)]

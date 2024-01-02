@@ -81,9 +81,9 @@ impl MysqlRead {
                         let column_name: String = column_name;
                         let is_nullable: String = is_nullable;
                         let data_type: String = data_type;
-                        let character_maximum_length: Option<i32> = character_maximum_length;
-                        let numeric_precision: Option<i32> = numeric_precision;
-                        let numeric_scale: Option<i32> = numeric_scale;
+                        let character_maximum_length: Option<i64> = character_maximum_length;
+                        let numeric_precision: Option<i64> = numeric_precision;
+                        let numeric_scale: Option<i64> = numeric_scale;
                         let column_comment: String = column_comment;
                         let column_type: String = column_type;
                         let extra: String = extra;

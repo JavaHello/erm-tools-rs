@@ -26,7 +26,7 @@ impl MdOut {
     }
 }
 
-fn i32_to_str(i: Option<i32>) -> String {
+fn to_str(i: Option<i64>) -> String {
     if let Some(i) = i {
         format!("{}", i)
     } else {
@@ -57,8 +57,8 @@ impl OutDiff for MdOut {
                             "|{}|{}|{}|{}|",
                             col.physical_name,
                             type_out(&col),
-                            i32_to_str(col.length),
-                            i32_to_str(col.decimal)
+                            to_str(col.length),
+                            to_str(col.decimal)
                         ));
                     } else {
                         self.content.push_str("|||||");
@@ -69,8 +69,8 @@ impl OutDiff for MdOut {
                             "|{}|{}|{}|{}|",
                             col.physical_name,
                             type_out(&col),
-                            i32_to_str(col.length),
-                            i32_to_str(col.decimal)
+                            to_str(col.length),
+                            to_str(col.decimal)
                         ));
                     } else {
                         self.content.push_str("|||||");
