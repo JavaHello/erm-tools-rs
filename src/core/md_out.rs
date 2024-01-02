@@ -48,8 +48,10 @@ impl OutDiff for MdOut {
             self.content
                 .push_str(&format!("# {}差异输出\n", self.db_name));
             for (k, dtb) in diff_tables.iter() {
-                self.content.push_str(&format!("\n## {}\n", k));
-                self.content.push_str(COLUMN_TITLE);
+                if !dtb.diff_columns.is_empty() {
+                    self.content.push_str(&format!("\n## {}\n", k));
+                    self.content.push_str(COLUMN_TITLE);
+                }
                 for dcol in dtb.diff_columns.iter() {
                     if let Some(col) = &dcol.source_column {
                         let col = (*col).borrow();
